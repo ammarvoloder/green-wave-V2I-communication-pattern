@@ -6,6 +6,7 @@
 	<artifactId>dse-group-02</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>dse-group-02</name>
+	<packaging>pom</packaging>
 
 	<modules>
 		<module>api-gateway</module>
