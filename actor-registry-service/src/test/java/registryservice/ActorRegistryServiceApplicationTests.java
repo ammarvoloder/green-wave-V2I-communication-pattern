@@ -1,4 +1,4 @@
-package at.tuwien.dse.actorregistryservice;
+package registryservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
