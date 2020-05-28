@@ -1,0 +1,25 @@
+version: '3'
+services:
+        mongo:
+                image: mongo
+                container_name: mongo-container
+                ports:
+                        - "27017:27017"
+        api-gateway:
+                build: api-gateway
+                image: api-gateway
+                container_name: api-gateway-container
+                ports:
+                        - "10113:10113"
+                environment:
+                        SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
+                restart: on-failure
+        actor-registy-service:
+                build: actor-registry-service
+                image: actor-registry-service
+                container_name: actor-registry-service-container
+                ports:
+                        - "40001:40001"
+                environment:
+                        SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
+                restart: on-failure

@@ -35,10 +35,10 @@ public class ActorRegistryService {
      * @param model of vehicle that is going to be stored in the db
      * @param producer of vehicle that is going to be stored in the db
      */
-    public void insertVehicle(String vin, String model, String producer){
+    public void addVehicle(String vin, String model, String producer){
         LOG.info("Inserting new Vehicle with ID: " + vin);
         Vehicle vehicle = new Vehicle(vin, model, producer);
-        actorRegistryDAO.insertVehicle(vehicle);
+        actorRegistryDAO.addVehicle(vehicle);
     }
 
     /**

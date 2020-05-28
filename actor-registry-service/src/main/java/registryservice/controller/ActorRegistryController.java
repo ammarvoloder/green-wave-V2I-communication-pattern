@@ -28,11 +28,11 @@ public class ActorRegistryController {
      * @return Response entity with response status 200
      */
     @PostMapping(path = "/addVehicle")
-    public ResponseEntity insertVehicle(@RequestParam String vin,
+    public ResponseEntity addVehicle(@RequestParam String vin,
                                         @RequestParam String model,
                                         @RequestParam String producer) {
         LOG.info("Received POST insert vehicle: " + vin);
-        actorRegistryService.insertVehicle(vin, model, producer);
+        actorRegistryService.addVehicle(vin, model, producer);
         return ResponseEntity.status(HttpStatus.OK).body("");
 
     }

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import registryservice.connection.Connection;
+import registryservice.dto.TrafficLight;
 import registryservice.dto.Vehicle;
 import registryservice.service.ActorRegistryService;
 
@@ -26,12 +27,18 @@ public class ActorRegistryDAO {
     private static final String VEHICLE_COLLECTION = "vehicles";
     private static final String PRODUCER = "producer";
     private static final String MODEL = "model";
+    private static final String LATITUDE = "latitude";
+    private static final String LONGITUDE = "longitude";
 
 
     /**
      * vehicles - MongoDB Collection used for storing Vehicles
      */
     private MongoCollection<Document> vehicles;
+    /**
+     * trafficLights - MongoDB Collection used for storing traffic lights
+     */
+    private MongoCollection<Document> trafficLights;
 
     @PostConstruct
     private void initialize(){
@@ -42,7 +49,7 @@ public class ActorRegistryDAO {
         }
     }
 
-    public void insertVehicle(Vehicle vehicle){
+    public void addVehicle(Vehicle vehicle){
         try {
             LOG.info("Inserting new vehicle: " + vehicle.getVin());
             Document document = new Document("_id", vehicle.getVin())
@@ -65,6 +72,33 @@ public class ActorRegistryDAO {
         ArrayList<Vehicle> list = new ArrayList<>();
         for (Document d : document) {
             list.add(new Vehicle(d.getString("_id"), d.getString(MODEL), d.getString(PRODUCER)));
+        }
+        return list;
+    }
+
+    public void addTrafficLight(TrafficLight trafficLight){
+        try {
+            LOG.info("Inserting new traffic light: " + trafficLight.getId());
+            Document document = new Document("_id", trafficLight.getId())
+                    .append(LATITUDE, trafficLight.getLatitude())
+                    .append(LONGITUDE, trafficLight.getLongitude());
+            trafficLights.insertOne(document);
+        } catch (MongoWriteException e){
+            LOG.error("Error while writing in Mongo");
+        }
+
+    }
+
+    /**
+     * Methods which gets all traffic lights
+     * @return List of all traffic lights
+     */
+    public List<TrafficLight> getAllTrafficLights() {
+        LOG.info("Getting all traffic lights");
+        FindIterable<Document> document = trafficLights.find();
+        ArrayList<TrafficLight> list = new ArrayList<>();
+        for (Document d : document) {
+            list.add(new TrafficLight(d.getLong("_id"), d.getDouble(LONGITUDE), d.getDouble(LATITUDE)));
         }
         return list;
     }
