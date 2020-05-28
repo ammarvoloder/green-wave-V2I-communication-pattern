@@ -1,26 +1,29 @@
 package at.tuwien.dse.apigateway.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
-
+@Service
 public class ApiGatewayService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiGatewayService.class);
 
     private Client client;
 
-    @Autowired()
     public ApiGatewayService() {
         client = ClientBuilder.newClient();
+    }
+
+    // TESTING PURPOSES
+    public ApiGatewayService(Client client) {
+        this.client = client;
     }
     /**
      * Forward call to insert vehicle to the entity store service and then dao

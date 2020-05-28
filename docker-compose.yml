@@ -13,7 +13,6 @@ services:
                         - "10113:10113"
                 environment:
                         SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
-                restart: on-failure
         actor-registy-service:
                 build: actor-registry-service
                 image: actor-registry-service
@@ -22,4 +21,3 @@ services:
                         - "40001:40001"
                 environment:
                         SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
-                restart: on-failure
