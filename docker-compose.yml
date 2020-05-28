@@ -13,7 +13,7 @@ services:
                         - "10113:10113"
                 environment:
                         SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
-        actor-registy-service:
+        actor-registry-service:
                 build: actor-registry-service
                 image: actor-registry-service
                 container_name: actor-registry-service-container
