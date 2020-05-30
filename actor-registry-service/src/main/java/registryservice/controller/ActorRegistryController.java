@@ -5,10 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import registryservice.dto.Vehicle;
 import registryservice.service.ActorRegistryService;
+
+import java.util.List;
 
 
 @RestController
@@ -36,5 +40,15 @@ public class ActorRegistryController {
         return ResponseEntity.status(HttpStatus.OK).body("");
 
     }
+
+    /**
+     * Rest GET Method - Get all vehicles from the db
+     * @return Response entity with a list of all vehicles and response status 200
+     */
+    @GetMapping(path = "/getAllVehicles")
+    public ResponseEntity<List<Vehicle>> getAllVehicles() {
+        return ResponseEntity.ok(actorRegistryService.getAllVehicles());
+    }
+
 
 }
