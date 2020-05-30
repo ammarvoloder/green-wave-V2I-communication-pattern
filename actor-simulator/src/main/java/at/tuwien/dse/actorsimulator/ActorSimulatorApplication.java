@@ -1,5 +1,7 @@
 package at.tuwien.dse.actorsimulator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,15 +13,18 @@ import java.util.List;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import sun.rmi.runtime.Log;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
 
 
 @SpringBootApplication
 public class ActorSimulatorApplication
 {
+    private static final Logger LOG = LoggerFactory.getLogger(ActorSimulatorApplication.class);
 
 	public static void main(String[] args) throws IOException
 	{
@@ -28,6 +33,7 @@ public class ActorSimulatorApplication
 		Client client = ClientBuilder.newClient();
 
 		saveVehicle(client, "A70-M-622", "5", "bmw");
+		getVehicles(client);
 	}
 
 	private static void readRoute() throws IOException
@@ -54,6 +60,14 @@ public class ActorSimulatorApplication
 				.queryParam("model", model)
 				.request().header("id", producer)
 				.build("POST")
+				.invoke();
+	}
+
+	private static void getVehicles(Client client){
+		String uri = constructorURIofResource("api-gateway",  10113, "getAllVehicles",  "");
+		Response response = client.target(uri)
+				.request()
+				.build("GET")
 				.invoke();
 	}
 
