@@ -2,8 +2,11 @@ package at.tuwien.dse.statustrackingservice.connection;
 
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +30,12 @@ public class Connection {
      */
     public static MongoDatabase getDatabase() throws IOException {
         LOG.info("Retrieving instance of mongodb.");
+        CodecRegistry pojoCodecRegistry = org.bson.codecs.configuration.CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), org.bson.codecs.configuration.CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         if (mongoClient == null) {
             String mongoDBURI = loadProperties().getProperty("spring.data.mongodb.uri");
             mongoClient = new MongoClient(new MongoClientURI(mongoDBURI));
         }
-        return mongoClient.getDatabase("vehicles");
+        return mongoClient.getDatabase("vehicles").withCodecRegistry(pojoCodecRegistry);
     }
 
     // Method used to load host and port for MongoDB from application.properties

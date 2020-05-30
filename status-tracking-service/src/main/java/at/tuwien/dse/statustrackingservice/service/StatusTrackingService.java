@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,11 @@ import java.nio.charset.StandardCharsets;
 public class StatusTrackingService {
 
     private final StatusTrackingDAO statusTrackingDAO;
+    private static final String MOVEMENT_QUEUE = "movement_queue";
+
+
+    private static final Logger LOG = LoggerFactory.getLogger(StatusTrackingService.class);
+
 
     private ObjectMapper objectMapper;
 
@@ -30,16 +37,15 @@ public class StatusTrackingService {
 
     private void consumeQueue() {
         RabbitChannel rabbitChannel = new RabbitChannel();
-        DeliverCallback movementCallback = new DeliverCallback() {
-            @Override
-            public void handle(String consumerTag, Delivery message) throws IOException {
-                String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-                Movement movement = objectMapper.readValue(msg, Movement.class);
-                statusTrackingDAO.addMovement(movement);
-            }
+        DeliverCallback movementCallback = (consumerTag, message) -> {
+            String msg = new String(message.getBody(), StandardCharsets.UTF_8);
+            Movement movement = objectMapper.readValue(msg, Movement.class);
+            LOG.info("Movement read: " + movement);
+            statusTrackingDAO.addMovement(movement);
         };
         try {
-            rabbitChannel.getChannel().basicConsume("q_entity_notification", true, movementCallback, consumerTag -> {});
+            LOG.info(rabbitChannel.toString());
+            rabbitChannel.getChannel().basicConsume("movement_queue", true, movementCallback, consumerTag -> {});
         } catch (IOException e) {
             e.printStackTrace();
         }

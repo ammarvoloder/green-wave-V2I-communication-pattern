@@ -26,7 +26,6 @@ public class ActorRegistryService {
     @PostConstruct
     private void postConstruct(){
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        // TODO: register to RabbitMQ queue as well
     }
 
     /**

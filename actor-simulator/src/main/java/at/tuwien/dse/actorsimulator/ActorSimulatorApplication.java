@@ -1,5 +1,6 @@
 package at.tuwien.dse.actorsimulator;
 
+import at.tuwien.dse.actorsimulator.service.SimulatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import sun.rmi.runtime.Log;
@@ -30,31 +32,15 @@ public class ActorSimulatorApplication
 	{
 		SpringApplication.run(ActorSimulatorApplication.class, args);
 
-		Client client = ClientBuilder.newClient();
-
-		saveVehicle(client, "A71-622", "5", "bmw");
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		getVehicles(client);
-	}
-
-	private static void readRoute() throws IOException
-	{
-		ClassPathResource resource = new ClassPathResource("route.txt");
-		InputStream inputStream = resource.getInputStream();
-		InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-		BufferedReader reader = new BufferedReader(streamReader);
-		List<String> res = new ArrayList<>();
-		for (String line; (line = reader.readLine()) != null;) {
-			// Process line
-			System.out.println(line);
-			res.add(line);
-		}
-
-		System.out.println(res.get(res.size()-1));
+//		Client client = ClientBuilder.newClient();
+//
+//		saveVehicle(client, "A71-622", "5", "bmw");
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		getVehicles(client);
 	}
 
 	private static void saveVehicle(Client client, String vehicleId, String model, String producer) {

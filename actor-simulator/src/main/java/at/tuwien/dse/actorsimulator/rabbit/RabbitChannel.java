@@ -22,7 +22,7 @@ public class RabbitChannel {
 
     private void createConnection() {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("rabbitmq");
+        connectionFactory.setHost("localhost");
         connectionFactory.setPort(5672);
         connectionFactory.setUsername("guest");
         connectionFactory.setPassword("guest");

@@ -7,7 +7,8 @@ public class Movement {
     private String vin;
     private double speed;
     private LocalDateTime dateTime;
-    private Location location;
+    private double longitude;
+    private double latitude;
     private boolean crash;
 
     public String getVin() {
@@ -34,12 +35,20 @@ public class Movement {
         this.dateTime = dateTime;
     }
 
-    public Location getLocation() {
-        return location;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
     public boolean isCrash() {
@@ -48,5 +57,14 @@ public class Movement {
 
     public void setCrash(boolean crash) {
         this.crash = crash;
+    }
+
+    @Override
+    public String toString() {
+        return "Movement{" +
+                "dateTime=" + dateTime +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                '}';
     }
 }
