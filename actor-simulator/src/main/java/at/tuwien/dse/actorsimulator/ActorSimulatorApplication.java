@@ -22,13 +22,18 @@ public class ActorSimulatorApplication
 
 		Client client = ClientBuilder.newClient();
 
-		saveVehicle(client, "A70-M-622", "5", "bmw");
+		saveVehicle(client, "A71-622", "5", "bmw");
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		getVehicles(client);
 	}
 
 
 	private static void saveVehicle(Client client, String vehicleId, String model, String producer) {
-		String uri = constructorURIofResource("api-gateway",  10113, "addVehicle",  "");
+		String uri = constructorURIofResource("localhost",  10113, "addVehicle",  "");
 		client.target(uri)
 				.queryParam("vehicleID", vehicleId)
 				.queryParam("producer", producer)
@@ -39,11 +44,12 @@ public class ActorSimulatorApplication
 	}
 
 	private static void getVehicles(Client client){
-		String uri = constructorURIofResource("api-gateway",  10113, "getAllVehicles",  "");
+		String uri = constructorURIofResource("localhost",  10113, "getAllVehicles",  "");
 		Response response = client.target(uri)
 				.request()
 				.build("GET")
 				.invoke();
+		System.out.println(response);
 	}
 
 	// construct and return URI of the request for all REST request in one method

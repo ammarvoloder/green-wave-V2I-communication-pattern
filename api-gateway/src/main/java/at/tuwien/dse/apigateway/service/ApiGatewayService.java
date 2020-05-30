@@ -45,7 +45,7 @@ public class ApiGatewayService {
     public ResponseEntity addVehicle(String producer, String vehicleID, String model, String headerId) {
         LOG.info("Send REST request to insert new vehicle with id: " + vehicleID);
         String uri = constructorURIofResource("actor-registry-service", 40001, "addVehicle", "");
-        Response response = client.target(uri).queryParam("producer", producer).queryParam("vehicleID", vehicleID).queryParam("model", model)
+        Response response = client.target(uri).queryParam("producer", producer).queryParam("vin", vehicleID).queryParam("model", model)
                 .request()
                 .build("POST")
                 .invoke();
@@ -59,7 +59,7 @@ public class ApiGatewayService {
      */
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         LOG.info("Send REST request to get all vehicles");
-        String uri = constructorURIofResource("entity-store-service", 40001, "getAllVehicles", "");
+        String uri = constructorURIofResource("actor-registry-service", 40001, "getAllVehicles", "");
         Response response = client.target(uri).request().get();
         return ResponseEntity.status(response.getStatus()).body(parseFromRequestResultToList(response.readEntity(String.class), Vehicle.class));
     }
