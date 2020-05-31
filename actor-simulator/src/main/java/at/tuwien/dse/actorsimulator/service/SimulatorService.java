@@ -2,9 +2,7 @@ package at.tuwien.dse.actorsimulator.service;
 
 import at.tuwien.dse.actorsimulator.dto.Movement;
 import at.tuwien.dse.actorsimulator.rabbit.RabbitChannel;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,11 +40,12 @@ public class SimulatorService {
                 .invoke();
     }
 
-    public void saveTrafficLight(double longitude, double latitude){
+    public void saveTrafficLight(double longitude, double latitude, Long id){
         String uri = constructorURIofResource("localhost", 10113, "addTrafficLight","");
         this.client.target(uri)
                 .queryParam("longitude", longitude)
                 .queryParam("latitude", latitude)
+                .queryParam("id",id)
                 .request()
                 .build("POST")
                 .invoke();

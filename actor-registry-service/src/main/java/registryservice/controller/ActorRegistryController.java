@@ -43,9 +43,9 @@ public class ActorRegistryController {
     }
 
     @PostMapping(path = "/addTrafficLight")
-    public ResponseEntity addTrafficLight(@RequestParam long id,
-                                     @RequestParam double longitude,
-                                     @RequestParam double latitude) {
+    public ResponseEntity addTrafficLight(@RequestParam Long id,
+                                     @RequestParam Double longitude,
+                                     @RequestParam Double latitude) {
         LOG.info("Received POST add traffic light: " + id);
         actorRegistryService.addTrafficLight(id, longitude, latitude);
         return ResponseEntity.status(HttpStatus.OK).body("");

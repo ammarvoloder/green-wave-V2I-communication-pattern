@@ -10,25 +10,20 @@ import com.rabbitmq.client.DeliverCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.annotation.ManagedBean;
-import javax.inject.Inject;
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @ManagedBean
 public class SimulatorComponent {
@@ -46,21 +41,27 @@ public class SimulatorComponent {
 
     @Autowired
     public SimulatorComponent(SimulatorService simulatorService) {
-        try {
             this.rabbitChannel = new RabbitChannel();
             this.simulatorService = simulatorService;
             this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
             this.vehicles = new ArrayList<>();
             this.movements = new ArrayList<>();
-            consumeQueue();
-            createVehicles();
-            createTrafficLights();
+
+    }
+
+    @PostConstruct
+    public void setUp() {
+        consumeQueue();
+        createVehicles();
+        createTrafficLights();
+        try {
             readRoute();
             pool.execute(new SimulationThread(v1, movements, rabbitChannel));
             Thread.sleep(2000);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+
     }
 
     private void createVehicles() {
@@ -73,9 +74,9 @@ public class SimulatorComponent {
     }
 
     private void createTrafficLights(){
-        saveTrafficLight(16.34912 ,48.16845);
-        saveTrafficLight(16.34548, 48.16265);
-        saveTrafficLight(16.33786,48.15213);
+        saveTrafficLight(16.34912 ,48.16845,1L);
+        saveTrafficLight(16.34548, 48.16265,2L);
+        saveTrafficLight(16.33786,48.15213,3L);
     }
 
     private void consumeQueue(){
@@ -103,9 +104,9 @@ public class SimulatorComponent {
             // Process line
             String [] arrayLine = line.split(",");
             Movement movement = new Movement();
-            movement.setLongitude(Double.valueOf(arrayLine[0]));
-            movement.setLatitude(Double.valueOf(arrayLine[1]));
-            movement.setDistance(Double.valueOf(arrayLine[2]));
+            movement.setLongitude(Double.parseDouble(arrayLine[0]));
+            movement.setLatitude(Double.parseDouble(arrayLine[1]));
+            movement.setDistance(Double.parseDouble(arrayLine[2]));
             this.movements.add(movement);
         }
     }
@@ -117,8 +118,8 @@ public class SimulatorComponent {
         return v;
     }
 
-    private void saveTrafficLight(double longitude, double latitude){
-        this.simulatorService.saveTrafficLight(longitude, latitude);
+    private void saveTrafficLight(double longitude, double latitude, Long id){
+        this.simulatorService.saveTrafficLight(longitude, latitude,id);
     }
 
     private void sendMovement(Movement movement){

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -54,10 +53,12 @@ public class ApiGatewayService {
         return ResponseEntity.status(response.getStatus()).body("");
     }
 
-    public ResponseEntity addTrafficLight(Long longitude, Long latitude){
+    public ResponseEntity addTrafficLight(Double longitude, Double latitude, Long id){
         LOG.info("Send REST request to insert new traffic light.");
         String uri = constructorURIofResource("actor-registry-service", 40001, "addTrafficLight", "");
-        Response response = client.target(uri).queryParam("longitude", longitude).queryParam("latitude", latitude)
+        Response response = client.target(uri).queryParam("longitude", longitude)
+                .queryParam("latitude", latitude)
+                .queryParam("id",id)
                 .request()
                 .build("POST")
                 .invoke();

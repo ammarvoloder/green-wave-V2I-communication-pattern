@@ -50,9 +50,9 @@ public class ActorRegistryService {
         return actorRegistryDAO.getAllVehicles();
     }
 
-    public void addTrafficLight(long id, double longitude, double latitude){
+    public void addTrafficLight(Long id, Double longitude, Double latitude){
         LOG.info("Inserting new Traffic Light with ID: " + id);
-        TrafficLight trafficLight = new TrafficLight(longitude, latitude);
+        TrafficLight trafficLight = new TrafficLight(longitude, latitude,id);
         actorRegistryDAO.addTrafficLight(trafficLight);
     }
 
