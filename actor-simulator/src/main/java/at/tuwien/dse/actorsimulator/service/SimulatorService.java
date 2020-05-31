@@ -23,8 +23,6 @@ public class SimulatorService {
 
     @Autowired
     public SimulatorService() {
-        rabbitChannel = new RabbitChannel();
-        objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         client = ClientBuilder.newClient();
     }
 
