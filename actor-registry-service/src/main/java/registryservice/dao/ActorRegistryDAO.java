@@ -1,17 +1,15 @@
 package registryservice.dao;
 
 import com.mongodb.MongoWriteException;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import registryservice.connection.Connection;
 import registryservice.dto.TrafficLight;
 import registryservice.dto.Vehicle;
-import registryservice.service.ActorRegistryService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -45,6 +43,7 @@ public class ActorRegistryDAO {
     private void initialize(){
         try {
             vehicles = Connection.getDatabase().getCollection(VEHICLE_COLLECTION,Vehicle.class);
+            vehicles.createIndex(Indexes.text("vin"), new IndexOptions().unique(true));
             trafficLights = Connection.getDatabase().getCollection(TRAFFIC_LIGHTS_COLLECTION, TrafficLight.class);
         } catch (IOException e) {
             LOG.error("Error while connecting to MongoDB.");
