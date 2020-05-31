@@ -2,34 +2,45 @@ version: '3'
 services:
         mongo:
                 image: mongo
-                container_name: mongo-container
                 ports:
                         - "27017:27017"
-        actor-simulator:
-                build: actor-simulator
-                image: actor-simulator
-                container_name: actor-simulator-container
-                environment:
-                        SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
-                depends_on:
-                        - api-gateway
-                        - actor-registry-service
-                restart: always
-        api-gateway:
-                build: api-gateway
-                image: api-gateway
-                container_name: api-gateway-container
+                expose:
+                        - 27017
+
+        rabbitmq:
+                image: rabbitmq
+                container_name: rabbitmq-container
                 ports:
-                        - "10113:10113"
-                environment:
-                        SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
-                restart: on-failure
-        actor-registry-service:
-                build: actor-registry-service
-                image: actor-registry-service
-                container_name: actor-registry-service-container
-                ports:
-                        - "40001:40001"
-                environment:
-                        SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
-                restart: on-failure
+                - "5672:5672"
+#        actor-simulator:
+#                build: actor-simulator
+#                image: actor-simulator
+#                container_name: actor-simulator-container
+#                depends_on:
+#                        - api-gateway
+#                        - actor-registry-service
+#                restart: always
+#        api-gateway:
+#                build: api-gateway
+#                image: api-gateway
+#                container_name: api-gateway-container
+#                ports:
+#                        - "10113:10113"
+#                expose:
+#                        - 10113
+#                environment:
+#                        SPRING_DATA_MONGODB_URI: mongodb://localhost:27017
+#                #restart: on-failure
+#        actor-registry-service:
+#                build: actor-registry-service
+#                image: actor-registry-service
+#                container_name: actor-registry-service-container
+#                ports:
+#                        - "40001:40001"
+#                environment:
+#                        SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
+#                depends_on:
+#                        - mongo
+#                expose:
+#                        - 40001
+#                #restart: on-failure

@@ -38,7 +38,7 @@ public class ApiGatewayController {
      * Rest GET Method - Get all vehicles to present on the UI
      * @return Response entity with a list of all vehicles to show to the client and the status received from entity store service
      */
-    @GetMapping(path = "/getAllVehicles/", consumes = {"text/plain", "application/*"})
+    @GetMapping(path = "/getAllVehicles")
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         LOG.info("Received GET all vehicles");
         return apiGatewayService.getAllVehicles();

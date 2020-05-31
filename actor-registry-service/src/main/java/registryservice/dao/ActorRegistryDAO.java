@@ -25,6 +25,7 @@ public class ActorRegistryDAO {
     private static final Logger LOG = LoggerFactory.getLogger(ActorRegistryDAO.class);
 
     private static final String VEHICLE_COLLECTION = "vehicles";
+    private static final String TRAFFIC_LIGHTS_COLLECTION = "traffic_lights";
     private static final String PRODUCER = "producer";
     private static final String MODEL = "model";
     private static final String LATITUDE = "latitude";
@@ -34,16 +35,17 @@ public class ActorRegistryDAO {
     /**
      * vehicles - MongoDB Collection used for storing Vehicles
      */
-    private MongoCollection<Document> vehicles;
+    private MongoCollection<Vehicle> vehicles;
     /**
      * trafficLights - MongoDB Collection used for storing traffic lights
      */
-    private MongoCollection<Document> trafficLights;
+    private MongoCollection<TrafficLight> trafficLights;
 
     @PostConstruct
     private void initialize(){
         try {
-            vehicles = Connection.getDatabase().getCollection("VEHICLE_COLLECTION");
+            vehicles = Connection.getDatabase().getCollection(VEHICLE_COLLECTION,Vehicle.class);
+            trafficLights = Connection.getDatabase().getCollection(TRAFFIC_LIGHTS_COLLECTION, TrafficLight.class);
         } catch (IOException e) {
             LOG.error("Error while connecting to MongoDB.");
         }
@@ -52,10 +54,7 @@ public class ActorRegistryDAO {
     public void addVehicle(Vehicle vehicle){
         try {
             LOG.info("Inserting new vehicle: " + vehicle.getVin());
-            Document document = new Document("_id", vehicle.getVin())
-                    .append(PRODUCER, vehicle.getProducer())
-                    .append(MODEL, vehicle.getModel());
-            vehicles.insertOne(document);
+            vehicles.insertOne(vehicle);
         } catch (MongoWriteException e){
             LOG.error("Error while writing in Mongo");
         }
@@ -68,21 +67,13 @@ public class ActorRegistryDAO {
      */
     public List<Vehicle> getAllVehicles() {
         LOG.info("Getting all vehicles");
-        FindIterable<Document> document = vehicles.find();
-        ArrayList<Vehicle> list = new ArrayList<>();
-        for (Document d : document) {
-            list.add(new Vehicle(d.getString("_id"), d.getString(MODEL), d.getString(PRODUCER)));
-        }
-        return list;
+        return vehicles.find().into(new ArrayList<>());
     }
 
     public void addTrafficLight(TrafficLight trafficLight){
         try {
             LOG.info("Inserting new traffic light: " + trafficLight.getId());
-            Document document = new Document("_id", trafficLight.getId())
-                    .append(LATITUDE, trafficLight.getLatitude())
-                    .append(LONGITUDE, trafficLight.getLongitude());
-            trafficLights.insertOne(document);
+            trafficLights.insertOne(trafficLight);
         } catch (MongoWriteException e){
             LOG.error("Error while writing in Mongo");
         }
@@ -95,12 +86,7 @@ public class ActorRegistryDAO {
      */
     public List<TrafficLight> getAllTrafficLights() {
         LOG.info("Getting all traffic lights");
-        FindIterable<Document> document = trafficLights.find();
-        ArrayList<TrafficLight> list = new ArrayList<>();
-        for (Document d : document) {
-            list.add(new TrafficLight(d.getLong("_id"), d.getDouble(LONGITUDE), d.getDouble(LATITUDE)));
-        }
-        return list;
+        return trafficLights.find().into(new ArrayList<>());
     }
 
 }

@@ -3,3 +3,4 @@
 docker rm $(docker ps -a -q) -v -f
 docker rmi actor-registry-service:latest
 docker rmi api-gateway:latest
+docker rmi actor-simulator
