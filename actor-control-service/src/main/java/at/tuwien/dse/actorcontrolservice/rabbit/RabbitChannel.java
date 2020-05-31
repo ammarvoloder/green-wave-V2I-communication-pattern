@@ -1,4 +1,4 @@
-package at.tuwien.dse.statustrackingservice.rabbit;
+package at.tuwien.dse.actorcontrolservice.rabbit;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -14,7 +14,7 @@ public class RabbitChannel {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitChannel.class);
     private static final String MOVEMENT_QUEUE = "movement_queue";
-    public static final String SPEED_QUEUE = "speed_queue";
+    public static final String RADIUS_QUEUE = "radisu_queue";
     private Channel channel;
 
 
@@ -35,7 +35,7 @@ public class RabbitChannel {
             connection = connectionFactory.newConnection();
             channel = connection.createChannel();
             channel.queueDeclare(MOVEMENT_QUEUE, false, false, false, null);
-            channel.queueDeclare(SPEED_QUEUE, false, false, false, null);
+            channel.queueDeclare(RADIUS_QUEUE, false, false, false, null);
             LOG.info("Creating new rabbitmq channel.");
         } catch (IOException | TimeoutException e) {
             LOG.error(e.getMessage());
