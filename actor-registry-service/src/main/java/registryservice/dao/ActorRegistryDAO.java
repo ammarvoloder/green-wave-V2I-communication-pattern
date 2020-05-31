@@ -45,6 +45,7 @@ public class ActorRegistryDAO {
             vehicles = Connection.getDatabase().getCollection(VEHICLE_COLLECTION,Vehicle.class);
             vehicles.createIndex(Indexes.text("vin"), new IndexOptions().unique(true));
             trafficLights = Connection.getDatabase().getCollection(TRAFFIC_LIGHTS_COLLECTION, TrafficLight.class);
+            trafficLights.createIndex(Indexes.text("id"), new IndexOptions().unique(true));
         } catch (IOException e) {
             LOG.error("Error while connecting to MongoDB.");
         }

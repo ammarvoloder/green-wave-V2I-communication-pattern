@@ -1,20 +1,19 @@
 package at.tuwien.dse.statustrackingservice.service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
+import at.tuwien.dse.statustrackingservice.dao.StatusTrackingDAO;
+import at.tuwien.dse.statustrackingservice.dto.Movement;
+import at.tuwien.dse.statustrackingservice.dto.TrafficLightStatus;
+import at.tuwien.dse.statustrackingservice.rabbit.RabbitChannel;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbitmq.client.DeliverCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.rabbitmq.client.DeliverCallback;
-
-import at.tuwien.dse.statustrackingservice.dao.StatusTrackingDAO;
-import at.tuwien.dse.statustrackingservice.dto.Movement;
-import at.tuwien.dse.statustrackingservice.rabbit.RabbitChannel;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class StatusTrackingService {
@@ -40,9 +39,18 @@ public class StatusTrackingService {
         RabbitChannel rabbitChannel = new RabbitChannel();
         DeliverCallback movementCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-            Movement movement = objectMapper.readValue(msg, Movement.class);
-            LOG.info("Movement read: " + movement);
-            statusTrackingDAO.addMovement(movement);
+
+            if (message.getProperties().getMessageId().equals("traffic")) {
+                TrafficLightStatus status = objectMapper.readValue(msg, TrafficLightStatus.class);
+                LOG.info("Traffic Light status read: " + status);
+                statusTrackingDAO.addTrafficLightStatus(status);
+
+            }
+            else {
+                Movement movement = objectMapper.readValue(msg, Movement.class);
+                LOG.info("Movement read: " + movement);
+                statusTrackingDAO.addMovement(movement);
+            }
 
         };
         try {

@@ -3,6 +3,7 @@ package at.tuwien.dse.actorcontrolservice.service;
 import at.tuwien.dse.actorcontrolservice.dao.ActorControlDAO;
 import at.tuwien.dse.actorcontrolservice.dto.Movement;
 import at.tuwien.dse.actorcontrolservice.dto.TrafficLight;
+import at.tuwien.dse.actorcontrolservice.dto.TrafficLightStatus;
 import at.tuwien.dse.actorcontrolservice.rabbit.RabbitChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -22,21 +23,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ActorControlService
-{
+public class ActorControlService {
 
-    private final ActorControlDAO actorControlDAO;
     private static final String MOVEMENT_QUEUE = "movement_queue";
-
-
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
-
-
+    private final ActorControlDAO actorControlDAO;
     private ObjectMapper objectMapper;
     private Client client;
 
     private List<TrafficLight> trafficLights = new ArrayList<>();
-
 
 
     @Autowired
@@ -48,14 +43,12 @@ public class ActorControlService
     }
 
     @PostConstruct
-    public void setUp()
-    {
+    public void setUp() {
         findTrafficLights();
         consumeQueue();
     }
 
-    private void findTrafficLights()
-    {
+    private void findTrafficLights() {
         String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
         trafficLights = parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class);
@@ -65,10 +58,20 @@ public class ActorControlService
         RabbitChannel rabbitChannel = new RabbitChannel();
         DeliverCallback movementCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-            Movement movement = objectMapper.readValue(msg, Movement.class);
-            LOG.info("Movement read: " + movement);
-            if(trafficLights.isEmpty())
-            {
+
+            TrafficLightStatus status;
+            Movement movement;
+            if (message.getProperties().getMessageId().equals("traffic")) {
+                status = objectMapper.readValue(msg, TrafficLightStatus.class);
+                LOG.info("Traffic Light status read: " + status);
+
+            } else {
+                movement = objectMapper.readValue(msg, Movement.class);
+                LOG.info("Movement read: " + movement);
+            }
+
+
+            if (trafficLights.isEmpty()) {
                 findTrafficLights();
             }
 
@@ -78,7 +81,8 @@ public class ActorControlService
         };
         try {
             LOG.info(rabbitChannel.toString());
-            rabbitChannel.getChannel().basicConsume("movement_queue", true, movementCallback, consumerTag -> {});
+            rabbitChannel.getChannel().basicConsume("movement_queue", true, movementCallback, consumerTag -> {
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,6 +90,15 @@ public class ActorControlService
     }
 
     private void isVehicleInRadius() {
+        for (TrafficLight trafficLight : trafficLights) {
+            if (trafficLight.getId() == 1L) {
+
+            } else if (trafficLight.getId() == 2L) {
+
+            } else {
+
+            }
+        }
     }
 
     private <T> List<T> parseFromRequestResultToList(String requestResult, Class clazz) {
@@ -100,8 +113,8 @@ public class ActorControlService
     }
 
 
-    private  String constructorURIofResource(String host, int port, String methodName, String pathParam) {
-        StringBuilder stringBuilder = new StringBuilder("http://" + host +  ":" + port + "/" + methodName);
+    private String constructorURIofResource(String host, int port, String methodName, String pathParam) {
+        StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
         if (!pathParam.isEmpty()) {
             stringBuilder.append("/").append(pathParam);
         }

@@ -3,7 +3,6 @@ package at.tuwien.dse.actorsimulator.component;
 import at.tuwien.dse.actorsimulator.dto.Movement;
 import at.tuwien.dse.actorsimulator.dto.Vehicle;
 import at.tuwien.dse.actorsimulator.rabbit.RabbitChannel;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
@@ -39,7 +38,7 @@ public class SimulationThread implements Runnable {
                 m.setCrash(false);
                 String msg = objectMapper.writeValueAsString(m);
                 LOG.info("Getting vehicle's speed: " + vehicle.getSpeed());
-                // rabbitChannel.getChannel().basicPublish("", "movement_queue", null, msg.getBytes());
+                rabbitChannel.getChannel().basicPublish("", "movement_queue", null, msg.getBytes());
                 double speed = m.getSpeed() / 3.6;
                 long timeToWait = (long) (m.getDistance() / speed * 1000);
                 Thread.sleep(timeToWait);
