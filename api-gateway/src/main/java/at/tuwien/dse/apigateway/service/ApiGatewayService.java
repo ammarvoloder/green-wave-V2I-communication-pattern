@@ -1,5 +1,6 @@
 package at.tuwien.dse.apigateway.service;
 
+import at.tuwien.dse.apigateway.dto.TrafficLight;
 import at.tuwien.dse.apigateway.dto.Vehicle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -51,6 +52,24 @@ public class ApiGatewayService {
                 .invoke();
 
         return ResponseEntity.status(response.getStatus()).body("");
+    }
+
+    public ResponseEntity addTrafficLight(Long longitude, Long latitude){
+        LOG.info("Send REST request to insert new traffic light.");
+        String uri = constructorURIofResource("actor-registry-service", 40001, "addTrafficLight", "");
+        Response response = client.target(uri).queryParam("longitude", longitude).queryParam("latitude", latitude)
+                .request()
+                .build("POST")
+                .invoke();
+
+        return ResponseEntity.status(response.getStatus()).body("");
+    }
+
+    public ResponseEntity<List<TrafficLight>> getAllTrafficLights(){
+        LOG.info("Send REST request to get all traffic lights");
+        String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
+        Response response = client.target(uri).request().get();
+        return ResponseEntity.status(response.getStatus()).body(parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class));
     }
 
     /**

@@ -1,6 +1,4 @@
-package registryservice.dto;
-
-import java.time.LocalDateTime;
+package at.tuwien.dse.apigateway.dto;
 
 public class TrafficLight {
 

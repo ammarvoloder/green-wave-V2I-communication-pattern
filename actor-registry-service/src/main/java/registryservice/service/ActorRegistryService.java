@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import registryservice.dao.ActorRegistryDAO;
+import registryservice.dto.TrafficLight;
 import registryservice.dto.Vehicle;
 
 import javax.annotation.PostConstruct;
@@ -47,5 +48,16 @@ public class ActorRegistryService {
     public List<Vehicle> getAllVehicles() {
         LOG.info("Getting all vehicles");
         return actorRegistryDAO.getAllVehicles();
+    }
+
+    public void addTrafficLight(long id, double longitude, double latitude){
+        LOG.info("Inserting new Traffic Light with ID: " + id);
+        TrafficLight trafficLight = new TrafficLight(longitude, latitude);
+        actorRegistryDAO.addTrafficLight(trafficLight);
+    }
+
+    public List<TrafficLight> getAllTrafficLights(){
+        LOG.info("Getting all traffic lights");
+        return actorRegistryDAO.getAllTrafficLights();
     }
 }

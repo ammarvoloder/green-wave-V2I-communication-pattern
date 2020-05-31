@@ -44,4 +44,11 @@ public class ApiGatewayController {
         return apiGatewayService.getAllVehicles();
     }
 
+    @PostMapping(path = "/addTrafficLight")
+    public ResponseEntity addTrafficLight(@RequestParam Long longitude,
+                                     @RequestParam Long latitude) {
+        LOG.info("Received POST insert traffic light");
+        return apiGatewayService.addTrafficLight(longitude, latitude);
+    }
+
 }
