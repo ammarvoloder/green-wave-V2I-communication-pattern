@@ -1,4 +1,4 @@
-package at.tuwien.dse.statustrackingservice.service;
+package at.tuwien.dse.actorcontrolservice.service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,28 +12,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.DeliverCallback;
 
-import at.tuwien.dse.statustrackingservice.dao.StatusTrackingDAO;
-import at.tuwien.dse.statustrackingservice.dto.Movement;
-import at.tuwien.dse.statustrackingservice.rabbit.RabbitChannel;
+import at.tuwien.dse.actorcontrolservice.dao.ActorControlDAO;
+import at.tuwien.dse.actorcontrolservice.dto.Movement;
+import at.tuwien.dse.actorcontrolservice.rabbit.RabbitChannel;
 
 @Service
-public class StatusTrackingService {
+public class ActorControlService
+{
 
-    private final StatusTrackingDAO statusTrackingDAO;
+    private final ActorControlDAO actorControlDAO;
     private static final String MOVEMENT_QUEUE = "movement_queue";
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(StatusTrackingService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
 
 
     private ObjectMapper objectMapper;
 
 
     @Autowired
-    public StatusTrackingService(StatusTrackingDAO statusTrackingDAO) {
+    public ActorControlService(ActorControlDAO actorControlDAO) {
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         consumeQueue();
-        this.statusTrackingDAO = statusTrackingDAO;
+        this.actorControlDAO = actorControlDAO;
     }
 
     private void consumeQueue() {
@@ -42,7 +43,6 @@ public class StatusTrackingService {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
             Movement movement = objectMapper.readValue(msg, Movement.class);
             LOG.info("Movement read: " + movement);
-            statusTrackingDAO.addMovement(movement);
 
         };
         try {
