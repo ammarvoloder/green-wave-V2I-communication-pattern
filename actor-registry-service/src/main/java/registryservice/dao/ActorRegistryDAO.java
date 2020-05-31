@@ -72,7 +72,7 @@ public class ActorRegistryDAO {
 
     public void addTrafficLight(TrafficLight trafficLight){
         try {
-            LOG.info("Inserting new traffic light: " + trafficLight.getId());
+            LOG.info("Inserting new traffic light");
             trafficLights.insertOne(trafficLight);
         } catch (MongoWriteException e){
             LOG.error("Error while writing in Mongo");

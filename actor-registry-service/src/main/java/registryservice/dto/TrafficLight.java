@@ -1,10 +1,12 @@
 package registryservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDateTime;
 
 public class TrafficLight {
 
-    private Long id;
+    private Long _id;
     private Double longitude;
     private Double latitude;
 
@@ -14,11 +16,11 @@ public class TrafficLight {
     }
 
     public Long getId() {
-        return id;
+        return _id;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this._id = id;
     }
 
     public Double getLongitude() {

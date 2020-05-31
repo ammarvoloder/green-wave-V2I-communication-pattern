@@ -28,12 +28,5 @@ public class ActorSimulatorApplication
 
     }
 
-    private static void sendMovement(Client client, String id, Location location) throws InterruptedException {
-	    //convert speed from km/h to m/s
-	    double speed = 80.0 / 3.6;
-	    long timeToWait = (long)(location.getDistance() / speed * 1000);
-        System.out.println("moram preci " + location.getDistance());
-        Thread.sleep(timeToWait);
-    }
 
 }
