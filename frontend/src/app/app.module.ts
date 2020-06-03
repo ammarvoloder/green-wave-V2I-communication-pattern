@@ -1,6 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router'
+import { GoogleMapsModule } from '@angular/google-maps'
+
 
 import { AppComponent } from './app.component';
 import { MapComponent } from './components/map/map.component';
@@ -16,6 +18,7 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     RouterModule.forRoot(routes),
+    GoogleMapsModule
   ],
   exports: [
     RouterModule,

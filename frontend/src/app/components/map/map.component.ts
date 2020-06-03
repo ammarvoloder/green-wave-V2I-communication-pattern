@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { TrafficLight } from '../../models/trafficlight';
+import * as Stomp from 'stompjs';
+import * as SockJS from 'sockjs-client';
 
 @Component({
   selector: 'app-map',
@@ -12,19 +14,17 @@ export class MapComponent implements OnInit {
   map: google.maps.Map;
 
   coordinates = new google.maps.LatLng(48.16411, 16.34629);
+  center: google.maps.LatLng;
   mapOptions: google.maps.MapOptions;
   startingSetup: any[];
   overlays: any[];
   trafficLights: Array<TrafficLight>
+  ws: any;
 
   constructor() { }
 
   ngOnInit() {
-    this.mapOptions={
-      center: this.coordinates,
-      zoom: 14.3
-     };
-    this.mapInitializer();
+   this.center = this.coordinates;
   }
  
   mapInitializer() {
@@ -38,6 +38,17 @@ export class MapComponent implements OnInit {
     ];
   }
 
+  connectToSocket(){
+    var socket = new SockJS('http://localhost:10113/ws');
+    this.ws = Stomp.over(socket);
+    let that = this;
+    this.ws.connect({}, function(frame) {
+      that.ws.subscribe("/topic", function(message) {
+        console.log(message)
+        console.log(message.body);
+      });
+  });
+}
   setupTrafficLights(){
     
   }

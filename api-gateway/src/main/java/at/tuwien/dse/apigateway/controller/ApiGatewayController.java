@@ -2,12 +2,18 @@ package at.tuwien.dse.apigateway.controller;
 
 import at.tuwien.dse.apigateway.dto.Vehicle;
 import at.tuwien.dse.apigateway.service.ApiGatewayService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @RestController
@@ -17,6 +23,13 @@ public class ApiGatewayController {
 
     @Autowired
     private ApiGatewayService apiGatewayService;
+
+    private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    ApiGatewayController(SimpMessagingTemplate template){
+        this.simpMessagingTemplate = template;
+    }
 
     /**
      * Rest POST Method - Insert new vehicle
@@ -32,6 +45,16 @@ public class ApiGatewayController {
                                         @RequestHeader("id") String headerId) {
         LOG.info("Received POST insert vehicle with id: " + vehicleID);
         return apiGatewayService.addVehicle(producer, vehicleID, model, headerId);
+    }
+
+    @PostMapping(path = "/sendToSocket")
+    public void sendVehicleToSocket(@RequestParam String producer,
+                                       @RequestParam String vehicleID,
+                                       @RequestParam String model) {
+
+        for (int i = 0; i<100; i++){
+            this.simpMessagingTemplate.convertAndSend("/topic",  i);
+        }
     }
 
     /**
