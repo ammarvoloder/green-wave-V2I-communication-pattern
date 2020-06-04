@@ -11,6 +11,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -54,8 +55,9 @@ public class ApiGatewayController {
     @PostMapping(path = "/sendToSocket")
     public void sendVehicleToSocket(@RequestParam Long id,
                                     @RequestParam Boolean green,
-                                    @RequestParam LocalDateTime time) {
-        TrafficLightStatus trafficLightStatus = new TrafficLightStatus(green, id, time);
+                                    @RequestParam String time) {
+        LOG.info("Get " + id);
+        TrafficLightStatus trafficLightStatus = new TrafficLightStatus(green, id, null);
         this.simpMessagingTemplate.convertAndSend("/trafficLights",  trafficLightStatus);
     }
 

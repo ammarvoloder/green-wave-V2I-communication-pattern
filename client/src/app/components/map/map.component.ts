@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { TrafficLight } from 'src/app/models/traffic-light';
 import { RestService } from 'src/app/services/rest-service';
 import { element } from 'protractor';
-import { MapMarker, MapInfoWindow } from '@angular/google-maps';
+import { MapMarker, MapInfoWindow, GoogleMap } from '@angular/google-maps';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
 
@@ -18,19 +18,20 @@ export class MapComponent implements OnInit {
   coordinates = new google.maps.LatLng(48.16411, 16.34629);
   trafficLights: TrafficLight[];
   markers: google.maps.Marker[];
-  options: google.maps.MarkerOptions;
+  //options: google.maps.MarkerOptions[];
   ws: any;
-  redLight = 'assets/images/green.png';
+  redLight = 'assets/images/red.png';
+  greenLight = 'assets/images/green.png';
   infoContent: string;
   trafficLightMap: Map<Number, google.maps.Marker>;
 
   
   constructor(private restService: RestService) { 
-    this.trafficLightMap = new Map()
+    this.trafficLightMap = new Map();
+    this.trafficLights = [];
   }
 
   ngOnInit(): void {
-    this.trafficLights = []
     this.markers = []
     this.center = this.coordinates;
     this.getAllTrafficLights();
@@ -41,26 +42,25 @@ export class MapComponent implements OnInit {
     let id;
     for (let [key, value] of this.trafficLightMap.entries()) {
       if(value.getPosition() ==  marker.getPosition()){
-        id = key
+        id = key;
       }
     }
-    let trafficLight = this.trafficLights.find(light => light.id === id)
-    this.infoContent = trafficLight.fullInfo()
+    let trafficLight = this.trafficLights.find(light => light.id === id);
+    console.log(trafficLight);
+    this.infoContent = trafficLight.fullInfo();
     this.infoWindow.open(marker);
   }
 
   getAllTrafficLights(){
     this.restService.getAllTrafficLights().subscribe(response => {
-      this.trafficLights = response;
-      this.trafficLights.forEach(element => {
+      response.forEach(element => {
         var coordinates = new google.maps.LatLng(element.latitude, element.longitude);
         const marker = new google.maps.Marker;
-        const options = {
-          icon: this.redLight
-        }
         marker.setPosition(coordinates);
-        marker.setOptions(options);
+        marker.setIcon(this.redLight);
         this.markers.push(marker);
+        this.trafficLights.push(new TrafficLight(element.id, element.longitude, element.latitude));
+        this.trafficLightMap.set(element.id, marker);
       })
     })
   }
@@ -72,7 +72,22 @@ export class MapComponent implements OnInit {
     this.ws.connect({}, function(frame) {
       that.ws.subscribe("/trafficLights", function(element) {
           console.log(element.body);
-          console.log(element.body.id);
+          let tl = JSON.parse(element.body);
+          let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
+          let index = that.trafficLights.indexOf(trafficLight);
+          trafficLight.statusGreen = tl['green'];
+          that.trafficLights[index] = trafficLight;
+          let marker = that.trafficLightMap.get(trafficLight.id); 
+          let marker_index = that.markers.indexOf(marker);
+          /* if (trafficLight.statusGreen) {
+            that.options = {
+              icon: that.greenLight
+            }
+          } else {
+            that.options = {
+              icon: that.redLight
+            } 
+          }*/
       });
     })
   }

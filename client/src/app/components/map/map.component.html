@@ -3,7 +3,7 @@
     #markerElem
     *ngFor="let marker of markers"
     [position]="marker.position"
-    [options]="options"
+    [options]="marker.options"
     (mapClick)="openInfo(markerElem)">
   </map-marker> 
   <map-info-window>{{infoContent}}</map-info-window>
