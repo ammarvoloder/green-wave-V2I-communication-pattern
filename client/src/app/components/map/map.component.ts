@@ -16,10 +16,12 @@ export class MapComponent implements OnInit {
   coordinates = new google.maps.LatLng(48.16411, 16.34629);
   trafficLights: TrafficLight[];
   markers: google.maps.Marker[];
+  options: google.maps.MarkerOptions;
+
   
 
 
-  redLight = 'src/assets/images/red.png';
+  redLight = 'assets/images/green.png';
   infoContent = '';
   
   constructor(private restService: RestService) { }
@@ -27,14 +29,8 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.markers = []
     this.center = this.coordinates;
-    //this.getAllTrafficLights();
-    const marker = new google.maps.Marker;
-    const options = {
-      icon: this.redLight
-    }
-    marker.setPosition(this.coordinates);
-    marker.setOptions(options);
-    this.markers.push(marker);
+    this.getAllTrafficLights();
+    //this.initSocketConnections();
   }
 
   openInfo(marker: MapMarker) {
@@ -45,20 +41,14 @@ export class MapComponent implements OnInit {
   getAllTrafficLights(){
     this.restService.getAllTrafficLights().subscribe(response => {
       this.trafficLights = response;
+      console.log(this.trafficLights);
       this.trafficLights.forEach(element => {
         var coordinates = new google.maps.LatLng(element.latitude, element.longitude);
-        const marker = new google.maps.Marker;
-        const options = {
-          icon: this.redLight
+        var marker = new google.maps.Marker;
+        this.options = {
+          icon: this.redLight, 
         }
         marker.setPosition(coordinates);
-        marker.setOptions(options);
-        marker.addListener('click', function() {
-          return function() {
-            this.infoWindow.setContent("bojana");
-            this.infoWindow.open(this.map, marker);
-        }
-        });
         this.markers.push(marker);
       })
     })
