@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone, ElementRef, AfterViewInit } from '@angular/core';
 import { TrafficLight } from 'src/app/models/traffic-light';
 import { RestService } from 'src/app/services/rest-service';
 import { element } from 'protractor';
@@ -11,11 +11,19 @@ import * as SockJS from 'sockjs-client';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
-export class MapComponent implements OnInit {
-
-  @ViewChild(MapInfoWindow, { static: false }) infoWindow: MapInfoWindow;
-  center: google.maps.LatLng;
+export class MapComponent implements AfterViewInit {
+  @ViewChild('mapContainer', {static: false}) gmap: ElementRef;
+  
+  map: google.maps.Map;
   coordinates = new google.maps.LatLng(48.16411, 16.34629);
+
+  mapOptions: google.maps.MapOptions = {
+    center: this.coordinates,
+    zoom: 14.5
+   };
+
+
+
   trafficLights: TrafficLight[];
   markers: google.maps.Marker[];
   //options: google.maps.MarkerOptions[];
@@ -31,13 +39,45 @@ export class MapComponent implements OnInit {
     this.trafficLights = [];
   }
 
-  ngOnInit(): void {
-    this.markers = []
-    this.center = this.coordinates;
+  ngAfterViewInit(): void {
+    this.mapInitializer();
     this.getAllTrafficLights();
-    this.initSocketConnections();
+    //this.initSocketConnections();
   }
 
+  mapInitializer(){
+    this.map = new google.maps.Map(this.gmap.nativeElement, 
+      this.mapOptions);
+  }
+
+  getAllTrafficLights(){
+    this.restService.getAllTrafficLights().subscribe(response => {
+      response.forEach(element => {
+        var coordinates = new google.maps.LatLng(element.latitude, element.longitude);
+        const marker = new google.maps.Marker;
+        const trafficLight = this.createTrafficLight(element);
+        marker.setPosition(coordinates);
+        marker.setIcon(this.redLight);
+        marker.setMap(this.map);
+        var content = `<span style="white-space: pre;">${trafficLight.fullInfo()}</span>`
+        const infoWindow = new google.maps.InfoWindow;
+        infoWindow.setContent(content);
+        marker.addListener('click', () => {
+          infoWindow.open(marker.getMap(), marker);
+          setTimeout(function(){infoWindow.close();}, 2000);
+        });
+        //this.markers.push(marker);
+        //this.trafficLights.push(new TrafficLight(element.id, element.longitude, element.latitude));
+        //this.trafficLightMap.set(element.id, marker);
+      })
+    });
+  }
+
+  createTrafficLight(element: any): TrafficLight {
+    return new TrafficLight(element.id, element.longitude, element.latitude);
+  }
+
+/* 
   openInfo(marker: MapMarker) {
     let id;
     for (let [key, value] of this.trafficLightMap.entries()) {
@@ -51,19 +91,7 @@ export class MapComponent implements OnInit {
     this.infoWindow.open(marker);
   }
 
-  getAllTrafficLights(){
-    this.restService.getAllTrafficLights().subscribe(response => {
-      response.forEach(element => {
-        var coordinates = new google.maps.LatLng(element.latitude, element.longitude);
-        const marker = new google.maps.Marker;
-        marker.setPosition(coordinates);
-        marker.setIcon(this.redLight);
-        this.markers.push(marker);
-        this.trafficLights.push(new TrafficLight(element.id, element.longitude, element.latitude));
-        this.trafficLightMap.set(element.id, marker);
-      })
-    })
-  }
+  
 
   initSocketConnections(){
     let ws = new SockJS("http://localhost:10113/ws");
@@ -87,9 +115,9 @@ export class MapComponent implements OnInit {
             that.options = {
               icon: that.redLight
             } 
-          }*/
+          }
       });
     })
-  }
+  } */
 
 }
