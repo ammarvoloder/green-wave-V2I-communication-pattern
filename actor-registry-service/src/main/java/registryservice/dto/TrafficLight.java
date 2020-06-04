@@ -6,9 +6,10 @@ public class TrafficLight {
     private Double longitude;
     private Double latitude;
 
-    public TrafficLight(Double longitude, Double latitude,Long id){
+    public TrafficLight(Double longitude, Double latitude, Long id){
         this.longitude = longitude;
         this.latitude = latitude;
+        this._id = id;
     }
 
     public Long getId() {

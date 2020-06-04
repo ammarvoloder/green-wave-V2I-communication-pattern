@@ -40,7 +40,7 @@ public class SimulatorService {
                 .invoke();
     }
 
-    public void saveTrafficLight(double longitude, double latitude, Long id){
+    public void saveTrafficLight(Double longitude, Double latitude, Long id){
         String uri = constructorURIofResource("localhost", 10113, "addTrafficLight","");
         this.client.target(uri)
                 .queryParam("longitude", longitude)

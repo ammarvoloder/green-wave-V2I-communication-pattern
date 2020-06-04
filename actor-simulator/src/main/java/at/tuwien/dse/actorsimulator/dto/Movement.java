@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 public class Movement {
 
     private String vin;
-    private double speed;
+    private Double speed;
     private LocalDateTime dateTime;
-    private double longitude;
-    private double latitude;
-    private double distance;
+    private Double longitude;
+    private Double latitude;
+    private Double distance;
     private boolean crash;
 
     public String getVin() {
@@ -36,19 +36,19 @@ public class Movement {
         this.dateTime = dateTime;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 

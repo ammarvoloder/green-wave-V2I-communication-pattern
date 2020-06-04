@@ -59,20 +59,20 @@ public class SimulatorComponent {
 
     @PostConstruct
     public void setUp() {
-        consumeQueue();
-        createVehicles();
+        //consumeQueue();
+        //createVehicles();
         createTrafficLights();
-        try {
+       /* try {
             readRoute();
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
             Thread.sleep(2000);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 
-    @Scheduled(fixedRate = 20000)
+    /*@Scheduled(fixedRate = 20000)
     private void sendTrafficLightStatuts() {
         trafficLightStatuses.forEach(trafficLight -> {
             trafficLight.setGreen(!trafficLight.isGreen());
@@ -86,7 +86,7 @@ public class SimulatorComponent {
                 e.printStackTrace();
             }
         });
-    }
+    }*/
 
     private void createVehicles() {
         saveVehicle("A11-T-111", "C4", "Citroen", 60.0);
@@ -140,9 +140,9 @@ public class SimulatorComponent {
         vehicles.add(v);
     }
 
-    private void saveTrafficLight(double longitude, double latitude, Long id, boolean green) {
+    private void saveTrafficLight(Double longitude, Double latitude, Long id, boolean green) {
         this.simulatorService.saveTrafficLight(longitude, latitude, id);
-        trafficLightStatuses.add(new TrafficLightStatus(green, id, LocalDateTime.now()));
+//        trafficLightStatuses.add(new TrafficLightStatus(green, id, LocalDateTime.now()));
     }
 
 

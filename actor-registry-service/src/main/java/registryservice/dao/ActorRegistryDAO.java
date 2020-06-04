@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import registryservice.connection.Connection;
 import registryservice.dto.TrafficLight;
@@ -48,14 +49,16 @@ public class ActorRegistryDAO {
      */
     private MongoCollection<Document> trafficLights;
 
-    @PostConstruct
-    private void initialize() {
+    @Autowired
+    public ActorRegistryDAO() {
         try {
+            Connection.getDatabase().drop();
+            Connection.getDatabase().getCollection(TRAFFIC_LIGHTS_COLLECTION).dropIndexes();
             vehicles = Connection.getDatabase().getCollection(VEHICLE_COLLECTION, Vehicle.class);
             vehicles.createIndex(Indexes.text("vin"), new IndexOptions().unique(true));
             trafficLights = Connection.getDatabase().getCollection(TRAFFIC_LIGHTS_COLLECTION);
-            trafficLights.createIndex(Indexes.text("id"), new IndexOptions().unique(true));
-            trafficLights.createIndex(Indexes.geo2d("location"));
+            //trafficLights.createIndex(Indexes.text("id"), new IndexOptions().unique(true));
+            trafficLights.createIndex(Indexes.geo2dsphere(LOCATION));
         } catch (IOException e) {
             LOG.error("Error while connecting to MongoDB.");
         }
@@ -82,7 +85,6 @@ public class ActorRegistryDAO {
     }
 
     public void addTrafficLight(TrafficLight trafficLight) {
-        try {
             LOG.info("Inserting new traffic light");
             List<Double> coordinates = new ArrayList<>();
             coordinates.add(trafficLight.getLatitude());
@@ -93,9 +95,6 @@ public class ActorRegistryDAO {
                     .append(ID, trafficLight.getId())
                     .append(LOCATION, location);
             trafficLights.insertOne(document);
-        } catch (MongoWriteException e) {
-            LOG.error("Error while writing in Mongo");
-        }
     }
 
     /**
@@ -129,10 +128,19 @@ public class ActorRegistryDAO {
      */
     public List<TrafficLight> getAllTrafficLights() {
         LOG.info("Getting all traffic lights");
-        //return trafficLights.find().into(new ArrayList<>());
         FindIterable<Document> iterable = trafficLights.find();
-        //TODO map document to traffic light dto
-        return null;
+        ArrayList<TrafficLight> trafficLights = new ArrayList<>();
+        for (Document d : iterable) {
+            trafficLights.add(mapDocumentToTrafficLight(d));
+        }
+        return trafficLights;
+    }
+
+    private TrafficLight mapDocumentToTrafficLight(Document d){
+        List<?> coordinates = (List<?>) ((Document)d.get(LOCATION)).get(COORDINATES);
+        Double latitude = ((Double) coordinates.get(0));
+        Double longitude = ((Double)coordinates.get(1));
+        return new TrafficLight(longitude, latitude, d.getLong(ID));
     }
 
 }

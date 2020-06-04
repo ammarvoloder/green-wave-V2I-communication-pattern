@@ -55,7 +55,7 @@ public class ApiGatewayService {
 
     public ResponseEntity addTrafficLight(Double longitude, Double latitude, Long id){
         LOG.info("Send REST request to insert new traffic light.");
-        String uri = constructorURIofResource("actor-registry-service", 40001, "addTrafficLight", "");
+        String uri = constructorURIofResource("localhost", 40001, "addTrafficLight", "");
         Response response = client.target(uri).queryParam("longitude", longitude)
                 .queryParam("latitude", latitude)
                 .queryParam("id",id)
@@ -68,7 +68,7 @@ public class ApiGatewayService {
 
     public ResponseEntity<List<TrafficLight>> getAllTrafficLights(){
         LOG.info("Send REST request to get all traffic lights");
-        String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
+        String uri = constructorURIofResource("localhost", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
         return ResponseEntity.status(response.getStatus()).body(parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class));
     }
@@ -91,6 +91,7 @@ public class ApiGatewayService {
         try {
             resultList = objectMapper.readValue(requestResult, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (IOException e) {
+            e.printStackTrace();
             LOG.error("Error while parsing object from String to List.");
         }
         return resultList;

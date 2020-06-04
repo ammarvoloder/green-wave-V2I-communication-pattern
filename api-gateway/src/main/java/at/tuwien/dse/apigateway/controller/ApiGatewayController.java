@@ -1,5 +1,6 @@
 package at.tuwien.dse.apigateway.controller;
 
+import at.tuwien.dse.apigateway.dto.TrafficLight;
 import at.tuwien.dse.apigateway.dto.Vehicle;
 import at.tuwien.dse.apigateway.service.ApiGatewayService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,6 +74,12 @@ public class ApiGatewayController {
                                           @RequestParam Long id) {
         LOG.info("Received POST insert traffic light");
         return apiGatewayService.addTrafficLight(longitude, latitude,id);
+    }
+
+    @GetMapping(path = "/getAllTrafficLights")
+    public ResponseEntity<List<TrafficLight>> getAllTrafficLights(){
+        LOG.info("Recieved GET all traffic lights");
+        return apiGatewayService.getAllTrafficLights();
     }
 
 }
