@@ -3,8 +3,10 @@
     #markerElem
     *ngFor="let marker of markers"
     [position]="marker.position"
-    [options]="marker.options"
+    [options]="options"
     (mapClick)="openInfo(markerElem)">
   </map-marker>
-  <map-info-window>{{infoContent}}</map-info-window>
+  <map-info-window>
+    {{infoContent}}
+  </map-info-window>
 </google-map>
