@@ -18,7 +18,6 @@ import registryservice.connection.Connection;
 import registryservice.dto.TrafficLight;
 import registryservice.dto.Vehicle;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,16 +84,16 @@ public class ActorRegistryDAO {
     }
 
     public void addTrafficLight(TrafficLight trafficLight) {
-            LOG.info("Inserting new traffic light");
-            List<Double> coordinates = new ArrayList<>();
-            coordinates.add(trafficLight.getLatitude());
-            coordinates.add(trafficLight.getLongitude());
-            Document location = new Document("type", "Point").append(COORDINATES, coordinates);
-            String _id = new ObjectId().toHexString();
-            Document document = new Document("_id", _id)
-                    .append(ID, trafficLight.getId())
-                    .append(LOCATION, location);
-            trafficLights.insertOne(document);
+        LOG.info("Inserting new traffic light");
+        List<Double> coordinates = new ArrayList<>();
+        coordinates.add(trafficLight.getLatitude());
+        coordinates.add(trafficLight.getLongitude());
+        Document location = new Document("type", "Point").append(COORDINATES, coordinates);
+        String _id = new ObjectId().toHexString();
+        Document document = new Document("_id", _id)
+                .append(ID, trafficLight.getId())
+                .append(LOCATION, location);
+        trafficLights.insertOne(document);
     }
 
     /**
@@ -116,7 +115,6 @@ public class ActorRegistryDAO {
                 trafficLight = trafficLights.find(and(eq(ID, "s1"), near(LOCATION, point, 1000.0, 0.0))).iterator();
             }
         }
-
         return trafficLight.hasNext() ? (Long) trafficLight.next().get(ID) : 0L;
 
     }
@@ -136,10 +134,10 @@ public class ActorRegistryDAO {
         return trafficLights;
     }
 
-    private TrafficLight mapDocumentToTrafficLight(Document d){
-        List<?> coordinates = (List<?>) ((Document)d.get(LOCATION)).get(COORDINATES);
+    private TrafficLight mapDocumentToTrafficLight(Document d) {
+        List<?> coordinates = (List<?>) ((Document) d.get(LOCATION)).get(COORDINATES);
         Double latitude = ((Double) coordinates.get(0));
-        Double longitude = ((Double)coordinates.get(1));
+        Double longitude = ((Double) coordinates.get(1));
         return new TrafficLight(longitude, latitude, d.getLong(ID));
     }
 

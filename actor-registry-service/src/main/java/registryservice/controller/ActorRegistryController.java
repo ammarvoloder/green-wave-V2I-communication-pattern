@@ -27,15 +27,16 @@ public class ActorRegistryController {
 
     /**
      * Rest POST Method - Insert new vehicle
-     * @param vin of vehicle that is going to be stored in the db
-     * @param model of vehicle that is going to be stored in the db
+     *
+     * @param vin      of vehicle that is going to be stored in the db
+     * @param model    of vehicle that is going to be stored in the db
      * @param producer of vehicle that is going to be stored in the db
      * @return Response entity with response status 200
      */
     @PostMapping(path = "/addVehicle")
     public ResponseEntity addVehicle(@RequestParam String vin,
-                                        @RequestParam String model,
-                                        @RequestParam String producer) {
+                                     @RequestParam String model,
+                                     @RequestParam String producer) {
         LOG.info("Received POST insert vehicle: " + vin);
         actorRegistryService.addVehicle(vin, model, producer);
         return ResponseEntity.status(HttpStatus.OK).body("");
@@ -44,8 +45,8 @@ public class ActorRegistryController {
 
     @PostMapping(path = "/addTrafficLight")
     public ResponseEntity addTrafficLight(@RequestParam Long id,
-                                     @RequestParam Double longitude,
-                                     @RequestParam Double latitude) {
+                                          @RequestParam Double longitude,
+                                          @RequestParam Double latitude) {
         LOG.info("Received POST add traffic light: " + id);
         actorRegistryService.addTrafficLight(id, longitude, latitude);
         return ResponseEntity.status(HttpStatus.OK).body("");
@@ -53,12 +54,19 @@ public class ActorRegistryController {
     }
 
 
+    @GetMapping(path = "/checkRadius")
+    public ResponseEntity<Long> checkRadius(@RequestParam Double latitude, @RequestParam Double longitude) {
+        LOG.info("Received check raidus for: " + latitude + " " + longitude);
+        return ResponseEntity.ok(actorRegistryService.checkRadius(latitude, longitude));
+    }
 
     /**
      * Rest GET Method - Get all vehicles from the db
+     *
      * @return Response entity with a list of all vehicles and response status 200
      */
     @GetMapping(path = "/getAllVehicles")
+
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         return ResponseEntity.ok(actorRegistryService.getAllVehicles());
     }

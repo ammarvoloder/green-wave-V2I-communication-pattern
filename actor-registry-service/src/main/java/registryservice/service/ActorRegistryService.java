@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import registryservice.dao.ActorRegistryDAO;
 import registryservice.dto.TrafficLight;
 import registryservice.dto.Vehicle;
@@ -25,17 +27,18 @@ public class ActorRegistryService {
     private ObjectMapper objectMapper;
 
     @PostConstruct
-    private void postConstruct(){
+    private void postConstruct() {
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
     /**
      * Store new vehicle in the db
-     * @param vin of vehicle that is going to be stored in the db
-     * @param model of vehicle that is going to be stored in the db
+     *
+     * @param vin      of vehicle that is going to be stored in the db
+     * @param model    of vehicle that is going to be stored in the db
      * @param producer of vehicle that is going to be stored in the db
      */
-    public void addVehicle(String vin, String model, String producer){
+    public void addVehicle(String vin, String model, String producer) {
         LOG.info("Inserting new Vehicle with ID: " + vin);
         Vehicle vehicle = new Vehicle(vin, model, producer);
         actorRegistryDAO.addVehicle(vehicle);
@@ -43,6 +46,7 @@ public class ActorRegistryService {
 
     /**
      * Get all vehicles from the db
+     *
      * @return List of all vehicles
      */
     public List<Vehicle> getAllVehicles() {
@@ -50,13 +54,18 @@ public class ActorRegistryService {
         return actorRegistryDAO.getAllVehicles();
     }
 
-    public void addTrafficLight(Long id, Double longitude, Double latitude){
+    @GetMapping(path = "/checkRadius")
+    public Long checkRadius(@RequestParam Double latitude, @RequestParam Double longitude) {
+        return actorRegistryDAO.findIfInRadius(latitude, longitude);
+    }
+
+    public void addTrafficLight(Long id, Double longitude, Double latitude) {
         LOG.info("Inserting new Traffic Light with ID: " + id);
-        TrafficLight trafficLight = new TrafficLight(longitude, latitude,id);
+        TrafficLight trafficLight = new TrafficLight(longitude, latitude, id);
         actorRegistryDAO.addTrafficLight(trafficLight);
     }
 
-    public List<TrafficLight> getAllTrafficLights(){
+    public List<TrafficLight> getAllTrafficLights() {
         LOG.info("Getting all traffic lights");
         return actorRegistryDAO.getAllTrafficLights();
     }

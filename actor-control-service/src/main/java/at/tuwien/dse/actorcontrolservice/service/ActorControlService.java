@@ -19,20 +19,24 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ActorControlService {
 
-    private static final String MOVEMENT_QUEUE = "movement_queue";
+    public final static double AVERAGE_RADIUS_OF_EARTH_KM = 6371;
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
+    private static final String MOVEMENT_QUEUE = "movement_queue";
     private final ActorControlDAO actorControlDAO;
     private ObjectMapper objectMapper;
     private Client client;
-
-    private List<TrafficLight> trafficLights = new ArrayList<>();
-
+    private Map<Long, TrafficLight> trafficLights = new HashMap<>();
+    private Map<Long, TrafficLightStatus> statusMap = new HashMap<>();
 
     @Autowired
     public ActorControlService(ActorControlDAO actorControlDAO) {
@@ -51,7 +55,8 @@ public class ActorControlService {
     private void findTrafficLights() {
         String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
-        trafficLights = parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class);
+        List<TrafficLight> list = parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class);
+        list.forEach(t -> trafficLights.put(t.getId(), t));
     }
 
     private void consumeQueue() {
@@ -59,23 +64,23 @@ public class ActorControlService {
         DeliverCallback movementCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
 
-            TrafficLightStatus status;
-            Movement movement;
-            if (message.getProperties().getMessageId().equals("traffic")) {
-                status = objectMapper.readValue(msg, TrafficLightStatus.class);
-                LOG.info("Traffic Light status read: " + status);
-
-            } else {
-                movement = objectMapper.readValue(msg, Movement.class);
-                LOG.info("Movement read: " + movement);
-            }
-
-
             if (trafficLights.isEmpty()) {
                 findTrafficLights();
             }
 
-            isVehicleInRadius();
+            TrafficLightStatus status;
+            Movement movement;
+
+            if (message.getProperties().getMessageId().equals("traffic")) {
+                status = objectMapper.readValue(msg, TrafficLightStatus.class);
+                statusMap.put(status.getTrafficLightId(), status);
+                LOG.info("Traffic Light status read: " + status);
+
+            } else {
+                movement = objectMapper.readValue(msg, Movement.class);
+                isVehicleInRadius(movement, rabbitChannel);
+                LOG.info("Movement read: " + movement);
+            }
 
 
         };
@@ -89,16 +94,53 @@ public class ActorControlService {
 
     }
 
-    private void isVehicleInRadius() {
-        for (TrafficLight trafficLight : trafficLights) {
-            if (trafficLight.getId() == 1L) {
+    private void isVehicleInRadius(Movement movement, RabbitChannel rabbitChannel) throws IOException {
 
-            } else if (trafficLight.getId() == 2L) {
+        if (statusMap.isEmpty()) return;
 
-            } else {
+        String uri = constructorURIofResource("actor-registry-service", 40001, "checkRadius", "");
+        Response response = client.target(uri)
+                .queryParam("longitude", movement.getLongitude())
+                .queryParam("latitude", movement.getLatitude())
+                .request().get();
 
-            }
+        Long trafficLight = response.readEntity(Long.class);
+        if (trafficLight == 0L) return;
+        determineSpeed(movement, trafficLight, rabbitChannel);
+
+    }
+
+    public int calculateDistanceInKilometer(double userLat, double userLng,
+                                            double venueLat, double venueLng) {
+
+        double latDistance = Math.toRadians(userLat - venueLat);
+        double lngDistance = Math.toRadians(userLng - venueLng);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(venueLat))
+                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
+    }
+
+    private void determineSpeed(Movement movement, Long trafficLightId, RabbitChannel rabbitChannel) throws IOException {
+        TrafficLight trafficLight = trafficLights.get(trafficLightId);
+        TrafficLightStatus status = statusMap.get(trafficLightId);
+
+        int distance = calculateDistanceInKilometer(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
+        long secondsLeft = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.HOURS);
+        distance *= 1000;
+        double speed = ((double) distance) / secondsLeft;
+        speed *= 3.6;
+
+        if (speed > 130 || (speed < 40 && distance > 100)) {
+            return;
         }
+        movement.setSpeed(speed);
+        String msg = objectMapper.writeValueAsString(movement);
+        rabbitChannel.getChannel().basicPublish("", "speed_queue", null, msg.getBytes());
     }
 
     private <T> List<T> parseFromRequestResultToList(String requestResult, Class clazz) {
