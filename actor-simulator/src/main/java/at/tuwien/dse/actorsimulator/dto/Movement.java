@@ -12,6 +12,10 @@ public class Movement {
     private Double distance;
     private boolean crash;
 
+    public Movement(){
+
+    }
+
     public String getVin() {
         return vin;
     }

@@ -5,6 +5,9 @@ public class Vehicle {
     private String model;
     private String producer;
 
+    public Vehicle() {
+    }
+
     public Vehicle(String vin, String model, String producer){
         this.vin = vin;
         this.model = model;

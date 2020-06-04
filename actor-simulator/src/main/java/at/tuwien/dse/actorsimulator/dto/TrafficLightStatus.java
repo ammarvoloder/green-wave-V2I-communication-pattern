@@ -7,6 +7,9 @@ public class TrafficLightStatus {
     private boolean green;
     private Long trafficLightId;
 
+    public TrafficLightStatus(){
+
+    }
     public TrafficLightStatus(boolean green, Long trafficLightId, LocalDateTime dateTime) {
         this.green = green;
         this.trafficLightId = trafficLightId;
