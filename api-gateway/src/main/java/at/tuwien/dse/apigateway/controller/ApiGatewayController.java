@@ -1,11 +1,13 @@
 package at.tuwien.dse.apigateway.controller;
 
 import at.tuwien.dse.apigateway.dto.TrafficLight;
+import at.tuwien.dse.apigateway.dto.TrafficLightStatus;
 import at.tuwien.dse.apigateway.dto.Vehicle;
 import at.tuwien.dse.apigateway.service.ApiGatewayService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -49,13 +52,11 @@ public class ApiGatewayController {
     }
 
     @PostMapping(path = "/sendToSocket")
-    public void sendVehicleToSocket(@RequestParam String producer,
-                                       @RequestParam String vehicleID,
-                                       @RequestParam String model) {
-
-        for (int i = 0; i<100; i++){
-            this.simpMessagingTemplate.convertAndSend("/topic",  i);
-        }
+    public void sendVehicleToSocket(@RequestParam Long id,
+                                    @RequestParam Boolean green,
+                                    @RequestParam LocalDateTime time) {
+        TrafficLightStatus trafficLightStatus = new TrafficLightStatus(green, id, time);
+        this.simpMessagingTemplate.convertAndSend("/trafficLights",  trafficLightStatus);
     }
 
     /**

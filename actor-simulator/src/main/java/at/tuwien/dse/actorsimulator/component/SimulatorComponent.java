@@ -54,6 +54,7 @@ public class SimulatorComponent {
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         this.vehicles = new ArrayList<>();
         this.movements = new ArrayList<>();
+        this.trafficLightStatuses = new ArrayList<>();
 
     }
 
@@ -142,7 +143,7 @@ public class SimulatorComponent {
 
     private void saveTrafficLight(Double longitude, Double latitude, Long id, boolean green) {
         this.simulatorService.saveTrafficLight(longitude, latitude, id);
-//        trafficLightStatuses.add(new TrafficLightStatus(green, id, LocalDateTime.now()));
+        trafficLightStatuses.add(new TrafficLightStatus(green, id, LocalDateTime.now()));
     }
 
 

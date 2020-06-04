@@ -3,6 +3,8 @@ import { TrafficLight } from 'src/app/models/traffic-light';
 import { RestService } from 'src/app/services/rest-service';
 import { element } from 'protractor';
 import { MapMarker, MapInfoWindow } from '@angular/google-maps';
+import * as Stomp from 'stompjs';
+import * as SockJS from 'sockjs-client';
 
 @Component({
   selector: 'app-map',
@@ -17,10 +19,7 @@ export class MapComponent implements OnInit {
   trafficLights: TrafficLight[];
   markers: google.maps.Marker[];
   options: google.maps.MarkerOptions;
-
-  
-
-
+  ws: any;
   redLight = 'assets/images/green.png';
   infoContent = '';
   
@@ -30,7 +29,7 @@ export class MapComponent implements OnInit {
     this.markers = []
     this.center = this.coordinates;
     this.getAllTrafficLights();
-    //this.initSocketConnections();
+    this.initSocketConnections();
   }
 
   openInfo(marker: MapMarker) {
@@ -51,6 +50,18 @@ export class MapComponent implements OnInit {
         marker.setPosition(coordinates);
         this.markers.push(marker);
       })
+    })
+  }
+
+  initSocketConnections(){
+    let ws = new SockJS("http://localhost:10113/ws");
+    this.ws = Stomp.over(ws);
+    let that = this;
+    this.ws.connect({}, function(frame) {
+      that.ws.subscribe("/trafficLights", function(element) {
+          console.log(element.body);
+          console.log(element.body.id);
+      });
     })
   }
 

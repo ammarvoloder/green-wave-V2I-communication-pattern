@@ -21,6 +21,8 @@
     "@angular/platform-browser-dynamic": "~9.1.7",
     "@angular/router": "~9.1.7",
     "rxjs": "~6.5.4",
+    "sockjs-client": "^1.4.0",
+    "stompjs": "^2.3.3",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
