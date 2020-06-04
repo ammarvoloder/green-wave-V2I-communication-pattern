@@ -16,10 +16,19 @@ export class MapComponent implements OnInit {
   coordinates = new google.maps.LatLng(48.16411, 16.34629);
   trafficLights: TrafficLight[];
   markers: google.maps.Marker[];
+<<<<<<< HEAD
   trafficLightMap: Map<Number, google.maps.Marker>
 
   redLight = 'assets/images/red.png';
   options: any;
+=======
+  options: google.maps.MarkerOptions;
+
+  
+
+
+  redLight = 'assets/images/green.png';
+>>>>>>> c72db718e8be5f4456b54ea8252e5b74a7015908
   infoContent = '';
   
   constructor(private restService: RestService) { 
@@ -30,6 +39,7 @@ export class MapComponent implements OnInit {
     this.trafficLights = []
     this.markers = []
     this.center = this.coordinates;
+<<<<<<< HEAD
     //this.getAllTrafficLights();
     const marker = new google.maps.Marker;
     this.options = {
@@ -42,6 +52,10 @@ export class MapComponent implements OnInit {
     this.markers.push(marker);
 
     this.trafficLightMap.set(trafficLight.id, marker)
+=======
+    this.getAllTrafficLights();
+    //this.initSocketConnections();
+>>>>>>> c72db718e8be5f4456b54ea8252e5b74a7015908
   }
 
   openInfo(marker: MapMarker) {
@@ -60,14 +74,18 @@ export class MapComponent implements OnInit {
   getAllTrafficLights(){
     this.restService.getAllTrafficLights().subscribe(response => {
       this.trafficLights = response;
+      console.log(this.trafficLights);
       this.trafficLights.forEach(element => {
         var coordinates = new google.maps.LatLng(element.latitude, element.longitude);
-        const marker = new google.maps.Marker;
-        const options = {
-          icon: this.redLight
+        var marker = new google.maps.Marker;
+        this.options = {
+          icon: this.redLight, 
         }
         marker.setPosition(coordinates);
+<<<<<<< HEAD
         marker.setOptions(options);
+=======
+>>>>>>> c72db718e8be5f4456b54ea8252e5b74a7015908
         this.markers.push(marker);
       })
     })
