@@ -1,6 +1,5 @@
 package at.tuwien.dse.actorcontrolservice.service;
 
-import at.tuwien.dse.actorcontrolservice.dao.ActorControlDAO;
 import at.tuwien.dse.actorcontrolservice.dto.Movement;
 import at.tuwien.dse.actorcontrolservice.dto.TrafficLight;
 import at.tuwien.dse.actorcontrolservice.dto.TrafficLightStatus;
@@ -29,18 +28,17 @@ import java.util.Map;
 @Service
 public class ActorControlService {
 
-    public final static double AVERAGE_RADIUS_OF_EARTH_KM = 6371;
+    public final static double AVERAGE_RADIUS_OF_EARTH_METERS = 6371000;
+    public static final int TRAFFIC_LIGHT_CHANGE = 10;
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
     private static final String MOVEMENT_QUEUE = "movement_queue";
-    private final ActorControlDAO actorControlDAO;
     private ObjectMapper objectMapper;
     private Client client;
     private Map<Long, TrafficLight> trafficLights = new HashMap<>();
     private Map<Long, TrafficLightStatus> statusMap = new HashMap<>();
 
     @Autowired
-    public ActorControlService(ActorControlDAO actorControlDAO) {
-        this.actorControlDAO = actorControlDAO;
+    public ActorControlService() {
         client = ClientBuilder.newClient();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -55,7 +53,7 @@ public class ActorControlService {
     private void findTrafficLights() {
         String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
-        List<TrafficLight> list = parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class);
+        List<TrafficLight> list = parseFromRequestResultToList(response.readEntity(String.class));
         list.forEach(t -> trafficLights.put(t.getId(), t));
     }
 
@@ -86,7 +84,7 @@ public class ActorControlService {
         };
         try {
             LOG.info(rabbitChannel.toString());
-            rabbitChannel.getChannel().basicConsume("movement_queue", true, movementCallback, consumerTag -> {
+            rabbitChannel.getChannel().basicConsume(MOVEMENT_QUEUE, true, movementCallback, consumerTag -> {
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,8 +108,8 @@ public class ActorControlService {
 
     }
 
-    public int calculateDistanceInKilometer(double userLat, double userLng,
-                                            double venueLat, double venueLng) {
+    public int calculateDistanceInMeter(double userLat, double userLng,
+                                        double venueLat, double venueLng) {
 
         double latDistance = Math.toRadians(userLat - venueLat);
         double lngDistance = Math.toRadians(userLng - venueLng);
@@ -122,20 +120,35 @@ public class ActorControlService {
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
+        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_METERS * c));
     }
 
     private void determineSpeed(Movement movement, Long trafficLightId, RabbitChannel rabbitChannel) throws IOException {
+        double speed;
         TrafficLight trafficLight = trafficLights.get(trafficLightId);
         TrafficLightStatus status = statusMap.get(trafficLightId);
 
-        int distance = calculateDistanceInKilometer(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
-        long secondsLeft = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.HOURS);
-        distance *= 1000;
-        double speed = ((double) distance) / secondsLeft;
+        int distance = calculateDistanceInMeter(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
+        long secondsPassed = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.SECONDS);
+        long secondsLeft = TRAFFIC_LIGHT_CHANGE - secondsPassed;
+
+        if (status.isGreen()) {
+            // if green try to reach green light with max speed (130 km/h)
+            if ((distance / (130 / 3.6)) < secondsLeft) {
+                speed = 130;
+            }
+            // else wait for next green light
+            else {
+                speed = ((double) distance) / (secondsLeft + TRAFFIC_LIGHT_CHANGE);
+            }
+        } else {
+            speed = ((double) distance) / (secondsLeft);
+        }
         speed *= 3.6;
 
-        if (speed > 130 || (speed < 40 && distance > 100)) {
+        // speed can't be greater than 130 and
+        // less then 40 if distance to traffic light is still large (> 200m)
+        if (speed > 130 || (speed < 40 && distance > 200)) {
             return;
         }
         movement.setSpeed(speed);
@@ -143,11 +156,11 @@ public class ActorControlService {
         rabbitChannel.getChannel().basicPublish("", "speed_queue", null, msg.getBytes());
     }
 
-    private <T> List<T> parseFromRequestResultToList(String requestResult, Class clazz) {
+    private <T> List<T> parseFromRequestResultToList(String requestResult) {
         LOG.info("Sending request: " + requestResult);
         List<T> resultList = new ArrayList<>();
         try {
-            resultList = objectMapper.readValue(requestResult, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
+            resultList = objectMapper.readValue(requestResult, objectMapper.getTypeFactory().constructCollectionType(List.class, TrafficLight.class));
         } catch (IOException e) {
             LOG.error("Error while parsing object from String to List.");
         }
