@@ -35,8 +35,8 @@ export class MapComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.mapInitializer();
-    this.getAllTrafficLights();
-    this.initSocketConnections();
+    //this.getAllTrafficLights();
+    //this.initSocketConnections();
   }
 
   mapInitializer(){

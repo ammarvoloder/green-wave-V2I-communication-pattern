@@ -1,0 +1,81 @@
+<div id="movementContainer" class="mat-elevation-z8">
+<mat-table id="tableMovement" class="lessons-table mat-elevation-z8" [dataSource]="movementDataSource">
+    <ng-container matColumnDef="vid">
+        <mat-header-cell *matHeaderCellDef>VID</mat-header-cell>
+        <mat-cell *matCellDef="let movement">{{movement.vid}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="speed">
+        <mat-header-cell *matHeaderCellDef>Current Speed</mat-header-cell>
+        <mat-cell class="speed-cell"
+                  *matCellDef="let movement">{{movement.speed}}</mat-cell>
+
+    </ng-container>
+
+    <ng-container matColumnDef="longitude">
+        <mat-header-cell *matHeaderCellDef>Longitude</mat-header-cell>
+        <mat-cell class="longitude-cell"
+                  *matCellDef="let movement">{{movement.longitude}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="latitude">
+        <mat-header-cell *matHeaderCellDef>Latitude</mat-header-cell>
+        <mat-cell class="longitude-cell"
+                  *matCellDef="let movement">{{movement.latitude}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="crash">
+        <mat-header-cell *matHeaderCellDef>Crash Happened</mat-header-cell>
+        <mat-cell class="crash-cell"
+                  *matCellDef="let movement">{{movement.crash}}</mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="movementDisplayedColumns"></mat-header-row>
+
+    <mat-row *matRowDef="let row; columns: movementDisplayedColumns"></mat-row>
+
+</mat-table>
+<mat-paginator #paginatorOne class="paginator"  [pageSize]="5" showFirstLastButtons></mat-paginator>
+</div>
+<div id="trafficLightContainer" class="mat-elevation-z8">
+<mat-table id="tableTrafficLight" class="lessons-table mat-elevation-z8" [dataSource]="trafficLightDataSource">
+
+    <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+        <mat-cell *matCellDef="let tlStatus">{{tlStatus.id}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="longitude">
+        <mat-header-cell *matHeaderCellDef>Longitude</mat-header-cell>
+        <mat-cell class="longitude-cell"
+                  *matCellDef="let tlStatus">{{tlStatus.longitude}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="latitude">
+        <mat-header-cell *matHeaderCellDef>Latitude</mat-header-cell>
+        <mat-cell class="longitude-cell"
+                  *matCellDef="let tlStatus">{{tlStatus.latitude}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell class="crash-cell"
+                  *matCellDef="let tlStatus">{{tlStatus.statusGreen}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="speed">
+        <mat-header-cell *matHeaderCellDef>Status Changed</mat-header-cell>
+        <mat-cell class="speed-cell"
+                  *matCellDef="let tlStatus">{{tlStatus.statusChanged}}</mat-cell>
+
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="trafficLightDisplayedColumns"></mat-header-row>
+
+    <mat-row *matRowDef="let row; columns: trafficLightDisplayedColumns"></mat-row>
+
+</mat-table>
+<mat-paginator #paginatorTwo class="paginator" [pageSize]="5" showFirstLastButtons></mat-paginator>
+</div>
+
+

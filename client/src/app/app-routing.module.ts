@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MapComponent } from './components/map/map.component';
+import { AppComponent } from './app.component';
 
 
 const routes: Routes = [
-  { path: '', component: MapComponent }
+  { path: '', component: AppComponent }
 ];
 
 @NgModule({
