@@ -45,7 +45,7 @@ public class StatusTrackingService {
                 TrafficLightStatus status = objectMapper.readValue(msg, TrafficLightStatus.class);
                 LOG.info("Traffic Light status read: " + status);
                 statusTrackingDAO.addTrafficLightStatus(status);
-                String uri = constructorURIofResource("localhost", 10113, "sendToSocket", "");
+                String uri = constructorURIofResource("localhost", 10113, "notifySocketTLStatus", "");
                 Response response = client.target(uri).queryParam("green", status.isGreen())
                         .queryParam("id", status.getTrafficLightId())
                         .queryParam("time",status.getDateTime())
@@ -57,6 +57,16 @@ public class StatusTrackingService {
                 Movement movement = objectMapper.readValue(msg, Movement.class);
                 LOG.info("Movement read: " + movement);
                 statusTrackingDAO.addMovement(movement);
+                String uri = constructorURIofResource("localhost", 10113, "notifySocketMovement", "");
+                Response response = client.target(uri).queryParam("vin", movement.getVin())
+                        .queryParam("speed", movement.getSpeed())
+                        .queryParam("time", movement.getDateTime())
+                        .queryParam("longitude", movement.getLongitude())
+                        .queryParam("latitude", movement.getLatitude())
+                        .queryParam("crash", movement.isCrash())
+                        .request()
+                        .build("POST")
+                        .invoke();
             }
 
         };

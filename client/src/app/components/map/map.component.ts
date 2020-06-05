@@ -24,6 +24,7 @@ export class MapComponent implements AfterViewInit {
   ws: any;
   redLight = 'assets/images/red.png';
   greenLight = 'assets/images/green.png';
+  car = 'assets/images/car.png'
   infoContent: string;
   trafficLightMarkerMap: Map<Number, google.maps.Marker>;
 
@@ -84,15 +85,16 @@ export class MapComponent implements AfterViewInit {
           let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
           let index = that.trafficLights.indexOf(trafficLight);
           trafficLight.statusGreen = tl['green'];
+          trafficLight.statusChange = tl['dateTime'];
           that.trafficLights[index] = trafficLight;
           let marker = that.trafficLightMarkerMap.get(trafficLight.id); 
           let options;
-          if (trafficLight.statusGreen) {
-            marker.setIcon(that.greenLight)
-          } else {
-            marker.setIcon(that.redLight);
-          }
+          marker.setIcon(trafficLight.statusGreen ? that.greenLight : that.redLight);
           that.addListenerToMarker(marker, trafficLight);
+      });
+      that.ws.subscribe("/movements", function(element) {
+        let car = JSON.parse(element.body);
+
       });
     })
   } 

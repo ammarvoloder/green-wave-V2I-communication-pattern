@@ -1,5 +1,6 @@
 package at.tuwien.dse.apigateway.controller;
 
+import at.tuwien.dse.apigateway.dto.Movement;
 import at.tuwien.dse.apigateway.dto.TrafficLight;
 import at.tuwien.dse.apigateway.dto.TrafficLightStatus;
 import at.tuwien.dse.apigateway.dto.Vehicle;
@@ -52,13 +53,31 @@ public class ApiGatewayController {
         return apiGatewayService.addVehicle(producer, vehicleID, model, headerId);
     }
 
-    @PostMapping(path = "/sendToSocket")
+    @PostMapping(path = "/notifySocketTLStatus")
     public void sendVehicleToSocket(@RequestParam Long id,
                                     @RequestParam Boolean green,
-                                    @RequestParam String time) {
+                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
         LOG.info("Get " + id);
-        TrafficLightStatus trafficLightStatus = new TrafficLightStatus(green, id, null);
+        TrafficLightStatus trafficLightStatus = new TrafficLightStatus(green, id, time);
         this.simpMessagingTemplate.convertAndSend("/trafficLights",  trafficLightStatus);
+    }
+
+    @PostMapping(path = "/notifySocketMovement")
+    public void sendMovementToSocket(@RequestParam String vin,
+                                     @RequestParam Double speed,
+                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time,
+                                     @RequestParam Double longitude,
+                                     @RequestParam Double latitude,
+                                     @RequestParam Boolean crash){
+        LOG.info("Sending movement to socket" + vin);
+        Movement movement = new Movement();
+        movement.setVin(vin);
+        movement.setSpeed(speed);
+        movement.setDateTime(time);
+        movement.setLongitude(longitude);
+        movement.setLatitude(latitude);
+        movement.setCrash(crash);
+        this.simpMessagingTemplate.convertAndSend("/movements", movement);
     }
 
     /**
