@@ -40,8 +40,7 @@ public class StatusTrackingService {
         RabbitChannel rabbitChannel = new RabbitChannel();
         DeliverCallback movementCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-
-            if (message.getProperties().getMessageId().equals("traffic")) {
+            if (("traffic").equals(message.getProperties().getMessageId())) {
                 TrafficLightStatus status = objectMapper.readValue(msg, TrafficLightStatus.class);
                 LOG.info("Traffic Light status read: " + status);
                 statusTrackingDAO.addTrafficLightStatus(status);

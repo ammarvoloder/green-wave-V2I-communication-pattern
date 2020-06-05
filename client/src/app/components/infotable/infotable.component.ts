@@ -5,16 +5,8 @@ import { TrafficLight } from '../../models/traffic-light';
 import { MatPaginator } from '@angular/material/paginator';
 
 const MOVEMENT_DATA: Movement[] = [
-  {vid: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null},
-  {vid: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null},
-  {vid: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null},
-  {vid: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null},
-  {vid: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null},
-  {vid: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null},
-  {vid: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null},
-  {vid: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null},
-  {vid: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null},
-  {vid: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null},
+  {vin: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null, vehicle: null, fullInfo: null},
+  {vin: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null, vehicle: null, fullInfo: null},
 ]
 
 const TRAFFIC_LIGHT_DATA: TrafficLight[] = [

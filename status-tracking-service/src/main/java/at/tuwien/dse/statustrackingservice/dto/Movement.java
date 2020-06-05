@@ -9,6 +9,7 @@ public class Movement {
     private LocalDateTime dateTime;
     private Double longitude;
     private Double latitude;
+    private Double distance;
     private boolean crash;
 
     public String getVin() {
@@ -57,6 +58,14 @@ public class Movement {
 
     public void setCrash(boolean crash) {
         this.crash = crash;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 
     @Override
