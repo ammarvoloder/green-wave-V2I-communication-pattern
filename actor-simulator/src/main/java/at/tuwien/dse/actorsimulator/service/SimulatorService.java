@@ -14,7 +14,7 @@ import java.io.IOException;
 @Service
 public class SimulatorService {
 
-
+    private final static String MOVEMENT_QUEUE = "movement_queue";
     private RabbitChannel rabbitChannel;
     private ObjectMapper objectMapper;
     private Client client;
@@ -26,7 +26,7 @@ public class SimulatorService {
 
     public void putMovementInQueue(Movement movement) throws IOException {
         String msg = objectMapper.writeValueAsString(movement);
-        rabbitChannel.getChannel().basicPublish("","movement_queue",null,msg.getBytes());
+        rabbitChannel.getChannel().basicPublish("",MOVEMENT_QUEUE,null,msg.getBytes());
     }
 
     public void saveVehicle(String vehicleId, String model, String producer) {

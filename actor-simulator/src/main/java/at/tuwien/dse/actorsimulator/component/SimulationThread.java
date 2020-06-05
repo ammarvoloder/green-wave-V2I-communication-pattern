@@ -5,6 +5,7 @@ import at.tuwien.dse.actorsimulator.dto.Vehicle;
 import at.tuwien.dse.actorsimulator.rabbit.RabbitChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbitmq.client.AMQP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ import java.util.List;
 public class SimulationThread implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
-
+    private static final String MOVEMENT_QUEUE = "movement_queue";
     private Vehicle vehicle;
     private List<Movement> movements;
     private RabbitChannel rabbitChannel;
@@ -38,7 +39,7 @@ public class SimulationThread implements Runnable {
                 m.setCrash(false);
                 String msg = objectMapper.writeValueAsString(m);
                 LOG.info("Getting vehicle's speed: " + vehicle.getSpeed());
-                rabbitChannel.getChannel().basicPublish("", "movement_queue", null, msg.getBytes());
+                rabbitChannel.getChannel().basicPublish("", MOVEMENT_QUEUE, null, msg.getBytes());
                 double speed = m.getSpeed() / 3.6;
                 long timeToWait = (long) (m.getDistance() / speed * 1000);
                 Thread.sleep(timeToWait);

@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 public class SimulatorComponent {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulatorComponent.class);
-
+    private static final String MOVEMENT_QUEUE = "movement_queue";
     private ExecutorService pool = Executors.newFixedThreadPool(3);
 
     private SimulatorService simulatorService;
@@ -61,20 +61,21 @@ public class SimulatorComponent {
     @PostConstruct
     public void setUp() {
         //consumeQueue();
-        //createVehicles();
+        createVehicles();
         createTrafficLights();
-       /* try {
+        try {
             readRoute();
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
             Thread.sleep(2000);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
 
     }
 
-    /*@Scheduled(fixedRate = 20000)
+    @Scheduled(fixedRate = 10000)
     private void sendTrafficLightStatuts() {
+        LOG.info("Sendig status at fixed rate...");
         trafficLightStatuses.forEach(trafficLight -> {
             trafficLight.setGreen(!trafficLight.isGreen());
             trafficLight.setDateTime(LocalDateTime.now());
@@ -82,12 +83,12 @@ public class SimulatorComponent {
             try {
                 msg = objectMapper.writeValueAsString(trafficLight);
                 BasicProperties messaageId = new BasicProperties().builder().messageId("traffic").build();
-                rabbitChannel.getChannel().basicPublish("", "movement_queue", messaageId, msg.getBytes());
+                rabbitChannel.getChannel().basicPublish("", MOVEMENT_QUEUE, messaageId, msg.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-    }*/
+    }
 
     private void createVehicles() {
         saveVehicle("A11-T-111", "C4", "Citroen", 60.0);
