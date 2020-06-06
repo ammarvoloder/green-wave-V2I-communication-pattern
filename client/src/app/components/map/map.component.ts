@@ -32,12 +32,16 @@ export class MapComponent implements AfterViewInit {
   car = 'assets/images/car.png';
   infoContent: string;
   trafficLightMarkerMap: Map<Number, google.maps.Marker>;
+  trafficLightInfoWindowMap: Map<Number, google.maps.InfoWindow>;
   movementMarkerMap: Map<String, google.maps.Marker>;
+  movementInfoWindowMap: Map<String, google.maps.InfoWindow>;
 
 
   constructor(private restService: RestService) { 
     this.trafficLightMarkerMap = new Map();
+    this.trafficLightInfoWindowMap = new Map();
     this.movementMarkerMap = new Map();
+    this.movementInfoWindowMap = new Map();
   }
 
   ngAfterViewInit(): void {
@@ -85,17 +89,23 @@ export class MapComponent implements AfterViewInit {
   }
 
   addListenerToMarker(marker: google.maps.Marker, trafficLight: TrafficLight, movement: Movement){
+    let infoWindow: google.maps.InfoWindow;
     if(trafficLight){
       var content = `<span style="white-space: pre;">${trafficLight.fullInfo()}</span>`;
+      infoWindow = this.trafficLightInfoWindowMap.get(trafficLight.id);
     } else {
       var content = `<span style="white-space: pre;">${movement.fullInfo()}</span>`;
+      infoWindow = this.movementInfoWindowMap.get(movement.vin);
     }
-    const infoWindow = new google.maps.InfoWindow;
+    if(!infoWindow) {
+      infoWindow = new google.maps.InfoWindow();
+    }
     infoWindow.setContent(content);
     marker.addListener('click', () => {
       infoWindow.open(marker.getMap(), marker);
-      setTimeout(function(){infoWindow.close();}, 5000);
+      setTimeout(function(){infoWindow.close();}, 10000);
     });
+    trafficLight ? this.trafficLightInfoWindowMap.set(trafficLight.id, infoWindow) : this.movementInfoWindowMap.set(movement.vin, infoWindow);
   }
 
   removeMovementeMarker(movement:Movement) {
@@ -145,6 +155,7 @@ export class MapComponent implements AfterViewInit {
         let marker = that.movementMarkerMap.get(movement.vin);
         if(marker){
           marker.setPosition(coordinates);
+          that.addListenerToMarker(marker, null, movement);
         }else{ 
           marker = new google.maps.Marker;
           marker.setPosition(coordinates);
