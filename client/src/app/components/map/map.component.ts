@@ -73,7 +73,6 @@ export class MapComponent implements AfterViewInit {
       response.forEach(element => {
         this.vehicles.push(new Vehicle(element.vin, element.model, element.producer));
       })
-      console.log(this.vehicles);
     })
   }
 
@@ -101,14 +100,18 @@ export class MapComponent implements AfterViewInit {
 
   removeMovementeMarker(movement:Movement) {
     let marker = this.movementMarkerMap.get(movement.vin);
-    marker.setMap(null);
-    this.movementMarkerMap.delete(movement.vin);
+    if(marker){
+      marker.setMap(null);
+      this.movementMarkerMap.delete(movement.vin);
+    }  
   }
 
   removeTrafficLightMarker(trafficLight:TrafficLight) {
     let marker = this.trafficLightMarkerMap.get(trafficLight.id);
-    marker.setMap(null);
-    this.trafficLightMarkerMap.delete(trafficLight.id);
+    if(marker){
+      marker.setMap(null);
+      this.trafficLightMarkerMap.delete(trafficLight.id);
+    }
   }
   
   initSocketConnections(){
@@ -123,9 +126,11 @@ export class MapComponent implements AfterViewInit {
           trafficLight.statusGreen = tl['green'];
           trafficLight.statusChange = tl['dateTime'];
           that.trafficLights[index] = trafficLight;
-          let marker = that.trafficLightMarkerMap.get(trafficLight.id); 
-          let options;
+          var coordinates = new google.maps.LatLng(trafficLight.latitude, trafficLight.longitude);
+          const marker = new google.maps.Marker;
+          marker.setPosition(coordinates);
           marker.setIcon(trafficLight.statusGreen ? that.greenLight : that.redLight);
+          marker.setMap(that.map);
           that.addListenerToMarker(marker, trafficLight, null);
           that.removeTrafficLightMarker(trafficLight);
           that.trafficLightMarkerMap.set(trafficLight.id, marker);
@@ -135,7 +140,6 @@ export class MapComponent implements AfterViewInit {
         let mvm = JSON.parse(element.body);
         let movement = that.createMovement(mvm);
         let vehicle = that.vehicles.find(v => v.vin === movement.vin);
-        console.log("printing vehicle:" + movement.latitude);
         movement.vehicle = vehicle;
         var coordinates = new google.maps.LatLng(movement.latitude, movement.longitude);
         const marker = new google.maps.Marker;

@@ -1,8 +1,8 @@
 <div id="movementContainer" class="mat-elevation-z8">
 <mat-table id="tableMovement" class="lessons-table mat-elevation-z8" [dataSource]="movementDataSource">
-    <ng-container matColumnDef="vid">
-        <mat-header-cell *matHeaderCellDef>VID</mat-header-cell>
-        <mat-cell *matCellDef="let movement">{{movement.vid}}</mat-cell>
+    <ng-container matColumnDef="vin">
+        <mat-header-cell *matHeaderCellDef>VIN</mat-header-cell>
+        <mat-cell *matCellDef="let movement">{{movement.vin}}</mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="speed">

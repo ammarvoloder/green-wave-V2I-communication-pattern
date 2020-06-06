@@ -1,9 +1,9 @@
 #movementContainer{
     width: 40vw;
-    height: 50vh;
+    min-height: 50vh;
 }
 
 #trafficLightContainer{
     width: 40vw;
-    height: 50vh;
+    min-height: 50vh;
 }
