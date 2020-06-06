@@ -33,10 +33,8 @@ export class MapComponent implements AfterViewInit {
   infoContent: string;
   trafficLightMarkerMap: Map<Number, google.maps.Marker>;
   movementMarkerMap: Map<String, google.maps.Marker>;
-  movementMarkers: google.maps.Marker[] = [];
-  trafficLightMarkers: google.maps.Marker[] = [];
 
-  
+
   constructor(private restService: RestService) { 
     this.trafficLightMarkerMap = new Map();
     this.movementMarkerMap = new Map();
@@ -101,16 +99,18 @@ export class MapComponent implements AfterViewInit {
     });
   }
 
-  // Removes the markers from the map, but keeps them in the array.
-  clearMarkers() {
-    console.log("sta posaljes")
-    console.log(this.movementMarkers)
-    for (var i = 0; i < this.movementMarkers.length; i++) {
-      this.movementMarkers[i].setMap(null);
-    }
+  removeMovementeMarker(movement:Movement) {
+    let marker = this.movementMarkerMap.get(movement.vin);
+    marker.setMap(null);
+    this.movementMarkerMap.delete(movement.vin);
+  }
+
+  removeTrafficLightMarker(trafficLight:TrafficLight) {
+    let marker = this.trafficLightMarkerMap.get(trafficLight.id);
+    marker.setMap(null);
+    this.trafficLightMarkerMap.delete(trafficLight.id);
   }
   
-
   initSocketConnections(){
     let ws = new SockJS("http://localhost:10113/ws");
     this.ws = Stomp.over(ws);
@@ -127,6 +127,9 @@ export class MapComponent implements AfterViewInit {
           let options;
           marker.setIcon(trafficLight.statusGreen ? that.greenLight : that.redLight);
           that.addListenerToMarker(marker, trafficLight, null);
+          that.removeTrafficLightMarker(trafficLight);
+          that.trafficLightMarkerMap.set(trafficLight.id, marker);
+
       });
       that.ws.subscribe("/movements", function(element) {
         let mvm = JSON.parse(element.body);
@@ -139,9 +142,8 @@ export class MapComponent implements AfterViewInit {
         marker.setPosition(coordinates);
         marker.setIcon(that.car);
         marker.setMap(that.map);
-        that.clearMarkers();
-        that.movementMarkers.push(marker);
         that.addListenerToMarker(marker, null, movement);
+        that.removeMovementeMarker(movement);
         that.movementMarkerMap.set(movement.vin, marker);
       });
     })
