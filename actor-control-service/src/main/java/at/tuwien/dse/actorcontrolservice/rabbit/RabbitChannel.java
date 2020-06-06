@@ -1,20 +1,19 @@
 package at.tuwien.dse.actorcontrolservice.rabbit;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 public class RabbitChannel {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitChannel.class);
-    private static final String MOVEMENT_QUEUE = "movement_queue";
-    public static final String RADIUS_QUEUE = "radisu_queue";
+    private static final String ACTOR_QUEUE = "actor_queue";
+    private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
     private Channel channel;
 
 
@@ -34,8 +33,9 @@ public class RabbitChannel {
         try {
             connection = connectionFactory.newConnection();
             channel = connection.createChannel();
-            channel.queueDeclare(MOVEMENT_QUEUE, false, false, false, null);
-            channel.queueDeclare(RADIUS_QUEUE, false, false, false, null);
+            channel.exchangeDeclare(MOVEMENT_STATUS_EXCHANGE, "fanout");
+            String mov_status_queue = channel.queueDeclare(ACTOR_QUEUE, false, false, false, null).getQueue();
+            channel.queueBind(mov_status_queue, MOVEMENT_STATUS_EXCHANGE, "");
             LOG.info("Creating new rabbitmq channel.");
         } catch (IOException | TimeoutException e) {
             LOG.error(e.getMessage());
