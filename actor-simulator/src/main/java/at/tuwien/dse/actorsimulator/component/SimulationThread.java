@@ -15,7 +15,6 @@ import java.util.List;
 public class SimulationThread implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
-    private static final String MOVEMENT_QUEUE = "movement_queue";
     private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
 
     private Vehicle vehicle;
@@ -32,18 +31,17 @@ public class SimulationThread implements Runnable {
 
     @Override
     public void run() {
-        for (int i = 0; i < movements.size(); i++) {
+        for (Movement movement : movements) {
             try {
-                Movement m = movements.get(i);
-                m.setSpeed(vehicle.getSpeed());
-                m.setVin(vehicle.getVin());
-                m.setDateTime(LocalDateTime.now());
-                m.setCrash(false);
-                String msg = objectMapper.writeValueAsString(m);
+                movement.setSpeed(vehicle.getSpeed());
+                movement.setVin(vehicle.getVin());
+                movement.setDateTime(LocalDateTime.now());
+                movement.setCrash(false);
+                String msg = objectMapper.writeValueAsString(movement);
                 LOG.info("Getting vehicle's speed: " + vehicle.getSpeed());
                 rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", null, msg.getBytes());
-                double speed = m.getSpeed() / 3.6;
-                long timeToWait = (long) (m.getDistance() / speed * 1000);
+                double speed = movement.getSpeed() / 3.6;
+                long timeToWait = (long) (movement.getDistance() / speed * 1000);
                 Thread.sleep(timeToWait);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();

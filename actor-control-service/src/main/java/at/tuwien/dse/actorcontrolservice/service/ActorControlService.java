@@ -109,7 +109,7 @@ public class ActorControlService {
             LOG.info("Movement not in radius");
             return;
         }
-        if (vehicleProvidedSpeed.get(movement.getVin()).equals(trafficLight)) {
+        if (trafficLight.equals(vehicleProvidedSpeed.get(movement.getVin()))) {
             LOG.info("Traffic light " + trafficLight + " already provided speed to " + movement.getVin());
             return;
         }
@@ -144,6 +144,7 @@ public class ActorControlService {
         long secondsLeft = TRAFFIC_LIGHT_CHANGE - secondsPassed;
 
         if (status.isGreen()) {
+            LOG.info("Current traffic light status: green");
             // if green try to reach green light with max speed (130 km/h)
             if ((distance / (130 / 3.6)) < secondsLeft) {
                 speed = 130;
@@ -153,6 +154,7 @@ public class ActorControlService {
                 speed = ((double) distance) / (secondsLeft + TRAFFIC_LIGHT_CHANGE);
             }
         } else {
+            LOG.info("Current traffic light status: red");
             speed = ((double) distance) / (secondsLeft);
         }
         speed *= 3.6;

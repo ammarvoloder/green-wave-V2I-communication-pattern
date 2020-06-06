@@ -1,15 +1,11 @@
 package at.tuwien.dse.actorsimulator.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class Vehicle {
 
     private String vin;
     private String model;
     private String producer;
     private Double speed;
-    @JsonIgnore
-    private boolean speedDetermined;
 
     public Vehicle() {
 
@@ -53,11 +49,5 @@ public class Vehicle {
         this.speed = speed;
     }
 
-    public boolean isSpeedDetermined() {
-        return speedDetermined;
-    }
 
-    public void setSpeedDetermined(boolean speedDetermined) {
-        this.speedDetermined = speedDetermined;
-    }
 }

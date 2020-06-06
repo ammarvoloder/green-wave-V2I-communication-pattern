@@ -7,13 +7,11 @@ import at.tuwien.dse.actorsimulator.rabbit.RabbitChannel;
 import at.tuwien.dse.actorsimulator.service.SimulatorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.DeliverCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
@@ -27,13 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @ManagedBean
 public class SimulatorComponent {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulatorComponent.class);
-    private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
     private ExecutorService pool = Executors.newFixedThreadPool(3);
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
 
     private SimulatorService simulatorService;
     private List<Movement> movements;
@@ -60,11 +61,12 @@ public class SimulatorComponent {
         createVehicles();
         createTrafficLights();
         try {
+            scheduler.scheduleAtFixedRate(new StatusScheduler(trafficLightStatuses, rabbitChannel), 0, 10, TimeUnit.SECONDS);
             readRoute();
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
-            Thread.sleep(20000);
+            Thread.sleep(15000);
             pool.execute(new SimulationThread(vehicles.get(1), movements, rabbitChannel));
-            Thread.sleep(30000);
+            Thread.sleep(15000);
             pool.execute(new SimulationThread(vehicles.get(2), movements, rabbitChannel));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -72,27 +74,11 @@ public class SimulatorComponent {
 
     }
 
-    @Scheduled(fixedRate = 10000)
-    private void sendTrafficLightStatuts() {
-        LOG.info("Sendig status at fixed rate...");
-        trafficLightStatuses.forEach(trafficLight -> {
-            trafficLight.setGreen(!trafficLight.isGreen());
-            trafficLight.setDateTime(LocalDateTime.now());
-            String msg;
-            try {
-                msg = objectMapper.writeValueAsString(trafficLight);
-                BasicProperties messaageId = new BasicProperties().builder().messageId("traffic").build();
-                rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", messaageId, msg.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     private void createVehicles() {
-        saveVehicle("A11-T-111", "C4", "Citroen", 60.0);
+        saveVehicle("A11-T-111", "C4", "Citroen", 70.0);
         saveVehicle("B22-E-222", "3", "Bmw", 80.0);
-        saveVehicle("C33-K-333", "E550", "Mercedes", 70.0);
+        saveVehicle("C33-K-333", "E550", "Mercedes", 90.0);
     }
 
     private void createTrafficLights() {
@@ -107,12 +93,7 @@ public class SimulatorComponent {
             Movement movement = objectMapper.readValue(msg, Movement.class);
             LOG.info("Speed read " + movement.getSpeed());
             vehicles.stream().filter(i -> i.getVin().equals(movement.getVin())).findFirst() //
-                    .ifPresent(v -> {
-                        v.setSpeed(movement.getSpeed());
-                        v.setSpeedDetermined(true);
-                        if (!v.isSpeedDetermined()) {
-                        }
-                    });
+                    .ifPresent(v -> v.setSpeed(movement.getSpeed()));
         };
         try {
             LOG.info(rabbitChannel.toString());
