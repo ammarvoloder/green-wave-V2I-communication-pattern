@@ -5,7 +5,6 @@ import at.tuwien.dse.actorsimulator.dto.Vehicle;
 import at.tuwien.dse.actorsimulator.rabbit.RabbitChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.rabbitmq.client.AMQP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,20 +16,23 @@ public class SimulationThread implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
     private static final String MOVEMENT_QUEUE = "movement_queue";
+    private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
+
     private Vehicle vehicle;
     private List<Movement> movements;
     private RabbitChannel rabbitChannel;
     private ObjectMapper objectMapper;
 
-    public SimulationThread(Vehicle vehicle, List<Movement> movements, RabbitChannel rabbitChannel){
+    public SimulationThread(Vehicle vehicle, List<Movement> movements, RabbitChannel rabbitChannel) {
         this.vehicle = vehicle;
         this.movements = movements;
         this.rabbitChannel = rabbitChannel;
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
+
     @Override
     public void run() {
-        for(int i=0; i<movements.size(); i++){
+        for (int i = 0; i < movements.size(); i++) {
             try {
                 Movement m = movements.get(i);
                 m.setSpeed(vehicle.getSpeed());
@@ -39,7 +41,7 @@ public class SimulationThread implements Runnable {
                 m.setCrash(false);
                 String msg = objectMapper.writeValueAsString(m);
                 LOG.info("Getting vehicle's speed: " + vehicle.getSpeed());
-                rabbitChannel.getChannel().basicPublish("", MOVEMENT_QUEUE, null, msg.getBytes());
+                rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", null, msg.getBytes());
                 double speed = m.getSpeed() / 3.6;
                 long timeToWait = (long) (m.getDistance() / speed * 1000);
                 Thread.sleep(timeToWait);

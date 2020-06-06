@@ -71,9 +71,13 @@ public class Movement {
     @Override
     public String toString() {
         return "Movement{" +
-                "dateTime=" + dateTime +
+                "vin='" + vin + '\'' +
+                ", speed=" + speed +
+                ", dateTime=" + dateTime +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
+                ", distance=" + distance +
+                ", crash=" + crash +
                 '}';
     }
 }

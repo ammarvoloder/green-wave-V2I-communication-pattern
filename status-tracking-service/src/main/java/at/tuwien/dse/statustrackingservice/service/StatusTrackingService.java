@@ -22,8 +22,8 @@ import java.nio.charset.StandardCharsets;
 public class StatusTrackingService {
 
     private static final Logger LOG = LoggerFactory.getLogger(StatusTrackingService.class);
+    private static final String STATUS_QUEUE = "status_queue";
     private final StatusTrackingDAO statusTrackingDAO;
-    private static final String MOVEMENT_QUEUE = "movement_queue";
     private ObjectMapper objectMapper;
     private Client client;
 
@@ -34,6 +34,15 @@ public class StatusTrackingService {
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         consumeQueue();
         this.statusTrackingDAO = statusTrackingDAO;
+    }
+
+    // construct and return URI of the request for all REST request in one method
+    private static String constructorURIofResource(String host, int port, String methodName, String pathParam) {
+        StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
+        if (!pathParam.isEmpty()) {
+            stringBuilder.append("/").append(pathParam);
+        }
+        return stringBuilder.toString();
     }
 
     private void consumeQueue() {
@@ -47,12 +56,11 @@ public class StatusTrackingService {
                 String uri = constructorURIofResource("localhost", 10113, "notifySocketTLStatus", "");
                 Response response = client.target(uri).queryParam("green", status.isGreen())
                         .queryParam("id", status.getTrafficLightId())
-                        .queryParam("time",status.getDateTime())
+                        .queryParam("time", status.getDateTime())
                         .request()
                         .build("POST")
                         .invoke();
-            }
-            else {
+            } else {
                 Movement movement = objectMapper.readValue(msg, Movement.class);
                 LOG.info("Movement read: " + movement);
                 statusTrackingDAO.addMovement(movement);
@@ -71,20 +79,12 @@ public class StatusTrackingService {
         };
         try {
             LOG.info(rabbitChannel.toString());
-            rabbitChannel.getChannel().basicConsume(MOVEMENT_QUEUE, true, movementCallback, consumerTag -> {});
+            rabbitChannel.getChannel().basicConsume(STATUS_QUEUE, true, movementCallback, consumerTag -> {
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
-    }
-
-    // construct and return URI of the request for all REST request in one method
-    private static String constructorURIofResource(String host, int port, String methodName, String pathParam) {
-        StringBuilder stringBuilder = new StringBuilder("http://" + host +  ":" + port + "/" + methodName);
-        if (!pathParam.isEmpty()) {
-            stringBuilder.append("/").append(pathParam);
-        }
-        return stringBuilder.toString();
     }
 }

@@ -6,14 +6,25 @@ public class TrafficLightStatus {
 
     private boolean green;
     private Long trafficLightId;
+    private LocalDateTime dateTime;
 
-    public TrafficLightStatus(){
+    public TrafficLightStatus() {
 
     }
+
     public TrafficLightStatus(boolean green, Long trafficLightId, LocalDateTime dateTime) {
         this.green = green;
         this.trafficLightId = trafficLightId;
         this.dateTime = dateTime;
+    }
+
+    @Override
+    public String toString() {
+        return "TrafficLightStatus{" +
+                "green=" + green +
+                ", trafficLightId=" + trafficLightId +
+                ", dateTime=" + dateTime +
+                '}';
     }
 
     public boolean isGreen() {
@@ -39,6 +50,4 @@ public class TrafficLightStatus {
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
-
-    private LocalDateTime dateTime;
 }

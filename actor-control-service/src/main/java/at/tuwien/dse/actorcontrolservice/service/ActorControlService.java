@@ -32,7 +32,7 @@ public class ActorControlService {
     public final static double AVERAGE_RADIUS_OF_EARTH_METERS = 6371000;
     public static final int TRAFFIC_LIGHT_CHANGE = 10;
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
-    private static final String MOVEMENT_QUEUE = "movement_queue";
+    private static final String ACTOR_QUEUE = "actor_queue";
     private ObjectMapper objectMapper;
     private Client client;
     private Map<Long, TrafficLight> trafficLights = new HashMap<>();
@@ -85,7 +85,7 @@ public class ActorControlService {
         };
         try {
             LOG.info(rabbitChannel.toString());
-            rabbitChannel.getChannel().basicConsume(MOVEMENT_QUEUE, true, movementCallback, consumerTag -> {
+            rabbitChannel.getChannel().basicConsume(ACTOR_QUEUE, true, movementCallback, consumerTag -> {
             });
         } catch (IOException e) {
             e.printStackTrace();

@@ -33,6 +33,7 @@ public class SimulatorComponent {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulatorComponent.class);
     private static final String MOVEMENT_QUEUE = "movement_queue";
+    private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
     private ExecutorService pool = Executors.newFixedThreadPool(3);
 
     private SimulatorService simulatorService;
@@ -83,7 +84,7 @@ public class SimulatorComponent {
             try {
                 msg = objectMapper.writeValueAsString(trafficLight);
                 BasicProperties messaageId = new BasicProperties().builder().messageId("traffic").build();
-                rabbitChannel.getChannel().basicPublish("", MOVEMENT_QUEUE, messaageId, msg.getBytes());
+                rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", messaageId, msg.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
