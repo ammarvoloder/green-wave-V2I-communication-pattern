@@ -32,7 +32,6 @@ import java.util.concurrent.Executors;
 public class SimulatorComponent {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulatorComponent.class);
-    private static final String MOVEMENT_QUEUE = "movement_queue";
     private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
     private ExecutorService pool = Executors.newFixedThreadPool(3);
 
@@ -40,10 +39,6 @@ public class SimulatorComponent {
     private List<Movement> movements;
     private List<Vehicle> vehicles;
     private List<TrafficLightStatus> trafficLightStatuses;
-    private Vehicle v1;
-    private Vehicle v2;
-    private Vehicle v3;
-
 
     private RabbitChannel rabbitChannel;
     private ObjectMapper objectMapper;

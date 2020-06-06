@@ -33,10 +33,12 @@ public class ActorControlService {
     public static final int TRAFFIC_LIGHT_CHANGE = 10;
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
     private static final String ACTOR_QUEUE = "actor_queue";
+
     private ObjectMapper objectMapper;
     private Client client;
     private Map<Long, TrafficLight> trafficLights = new HashMap<>();
     private ConcurrentHashMap<Long, TrafficLightStatus> statusMap = new ConcurrentHashMap<>();
+    private Map<String, Long> vehicleProvidedSpeed = new HashMap<>();
 
     @Autowired
     public ActorControlService() {
@@ -96,7 +98,6 @@ public class ActorControlService {
     private void isVehicleInRadius(Movement movement, RabbitChannel rabbitChannel) throws IOException {
 
         if (statusMap.isEmpty()) return;
-
         String uri = constructorURIofResource("localhost", 40001, "checkRadius", "");
         Response response = client.target(uri)
                 .queryParam("longitude", movement.getLongitude())
@@ -108,8 +109,11 @@ public class ActorControlService {
             LOG.info("Movement not in radius");
             return;
         }
+        if (vehicleProvidedSpeed.get(movement.getVin()).equals(trafficLight)) {
+            LOG.info("Traffic light " + trafficLight + " already provided speed to " + movement.getVin());
+            return;
+        }
         determineSpeed(movement, trafficLight, rabbitChannel);
-
     }
 
     public int calculateDistanceInMeter(double userLat, double userLng,
@@ -156,10 +160,14 @@ public class ActorControlService {
         LOG.info("Determined speed " + speed);
 
         // speed can't be greater than 130 and
-        // less then 40 if distance to traffic light is still large (> 200m)
-        if (speed > 130 || (speed < 40 && distance > 200)) {
+        // less then 40 if distance to traffic light is still large (> 300m)
+        if (speed > 130 || (speed < 40 && distance > 300)) {
             return;
         }
+
+        // save which traffic light provided this vehicle with the speed
+        // so that we only have to determine speed once per traffic light
+        vehicleProvidedSpeed.put(movement.getVin(), trafficLightId);
         movement.setSpeed(speed);
         String msg = objectMapper.writeValueAsString(movement);
         rabbitChannel.getChannel().basicPublish("", "speed_queue", null, msg.getBytes());
