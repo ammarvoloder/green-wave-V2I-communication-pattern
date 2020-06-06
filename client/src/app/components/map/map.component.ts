@@ -94,7 +94,7 @@ export class MapComponent implements AfterViewInit {
     infoWindow.setContent(content);
     marker.addListener('click', () => {
       infoWindow.open(marker.getMap(), marker);
-      setTimeout(function(){infoWindow.close();}, 4000);
+      setTimeout(function(){infoWindow.close();}, 5000);
     });
   }
 
@@ -142,13 +142,18 @@ export class MapComponent implements AfterViewInit {
         let vehicle = that.vehicles.find(v => v.vin === movement.vin);
         movement.vehicle = vehicle;
         var coordinates = new google.maps.LatLng(movement.latitude, movement.longitude);
-        const marker = new google.maps.Marker;
-        marker.setPosition(coordinates);
-        marker.setIcon(that.car);
-        marker.setMap(that.map);
-        that.addListenerToMarker(marker, null, movement);
-        that.removeMovementeMarker(movement);
-        that.movementMarkerMap.set(movement.vin, marker);
+        let marker = that.movementMarkerMap.get(movement.vin);
+        if(marker){
+          marker.setPosition(coordinates);
+        }else{ 
+          marker = new google.maps.Marker;
+          marker.setPosition(coordinates);
+          marker.setIcon(that.car);
+          marker.setMap(that.map);
+          that.addListenerToMarker(marker, null, movement);
+          that.removeMovementeMarker(movement);
+          that.movementMarkerMap.set(movement.vin, marker);
+        }
       });
     })
   } 

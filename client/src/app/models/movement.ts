@@ -18,7 +18,13 @@ export class Movement {
     }
 
     fullInfo(){
-        return this.vin  +
-         "  " + this.speed;
+        return 'VIN: ' + this.vin + '\n'
+                + 'Model: ' + this.vehicle.model + '\n'
+                + 'Producer: ' + this.vehicle.producer + '\n'
+                + 'Speed: ' + this.speed + 'km/h \n'
+                + 'Longitude: ' + this.longitude + '\n'
+                + 'Latitude: ' + this.latitude + '\n'
+                + 'Crash happened: ' + this.crash + '\n'
+                
     }
 }
