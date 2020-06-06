@@ -8,7 +8,7 @@
     <ng-container matColumnDef="speed">
         <mat-header-cell *matHeaderCellDef>Current Speed</mat-header-cell>
         <mat-cell class="speed-cell"
-                  *matCellDef="let movement">{{movement.speed}}</mat-cell>
+                  *matCellDef="let movement">{{formatNumber(movement.speed)}} km/h</mat-cell>
 
     </ng-container>
 
@@ -25,9 +25,15 @@
     </ng-container>
 
     <ng-container matColumnDef="crash">
-        <mat-header-cell *matHeaderCellDef>Crash Happened</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef>Crash</mat-header-cell>
         <mat-cell class="crash-cell"
                   *matCellDef="let movement">{{movement.crash}}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="statusChange">
+        <mat-header-cell *matHeaderCellDef>Last Status Change</mat-header-cell>
+        <mat-cell class="speed-cell"
+                  *matCellDef="let movement">{{movement.dateTime | date : "medium"}}</mat-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="movementDisplayedColumns"></mat-header-row>
@@ -63,11 +69,10 @@
                   *matCellDef="let tlStatus">{{tlStatus.statusGreen}}</mat-cell>
     </ng-container>
 
-    <ng-container matColumnDef="speed">
-        <mat-header-cell *matHeaderCellDef>Status Changed</mat-header-cell>
+    <ng-container matColumnDef="statusChange">
+        <mat-header-cell *matHeaderCellDef>Next Status Change</mat-header-cell>
         <mat-cell class="speed-cell"
-                  *matCellDef="let tlStatus">{{tlStatus.statusChanged}}</mat-cell>
-
+                  *matCellDef="let tlStatus">{{tlStatus.statusChange | date : "medium"}}</mat-cell>
     </ng-container>
 
     <mat-header-row *matHeaderRowDef="trafficLightDisplayedColumns"></mat-header-row>

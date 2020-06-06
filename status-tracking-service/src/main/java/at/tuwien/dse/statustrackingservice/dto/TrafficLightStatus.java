@@ -41,4 +41,13 @@ public class TrafficLightStatus {
     }
 
     private LocalDateTime dateTime;
+
+    @Override
+    public String toString() {
+        return "TrafficLightStatus{" +
+                "green=" + green +
+                ", trafficLightId=" + trafficLightId +
+                ", dateTime=" + dateTime +
+                '}';
+    }
 }

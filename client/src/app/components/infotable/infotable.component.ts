@@ -20,9 +20,9 @@ export class InfotableComponent implements OnInit {
 
   ws: any;
 
-  movementDisplayedColumns: string[] = ['vin', 'speed', 'longitude', 'latitude', 'crash'];
+  movementDisplayedColumns: string[] = ['vin', 'speed', 'longitude', 'latitude', 'crash', 'statusChange' ];
   movementDataSource = new MatTableDataSource<Movement>();
-  trafficLightDisplayedColumns: string[] = ['id', 'longitude', 'latitude', 'status'];
+  trafficLightDisplayedColumns: string[] = ['id', 'longitude', 'latitude', 'status', 'statusChange'];
   trafficLightDataSource = new MatTableDataSource<TrafficLight>();
   trafficLights: TrafficLight[] = [];
   
@@ -47,7 +47,7 @@ export class InfotableComponent implements OnInit {
   }
 
   createMovement(element: any): Movement {
-    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash);
+    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, element.dateTime);
   }
 
   createTrafficLight(element: any){
@@ -60,13 +60,13 @@ export class InfotableComponent implements OnInit {
     let that = this;
     this.ws.connect({}, function(frame) {
       that.ws.subscribe("/trafficLights", function(element) {
-          let tl = JSON.parse(element.body);
-          let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
-          trafficLight.statusGreen = tl['green'];
-          trafficLight.statusChange = tl['dateTime'];
-          const data = that.trafficLightDataSource.data;
-          data.unshift(trafficLight);
-          that.trafficLightDataSource.data = data;
+        let tl = JSON.parse(element.body);
+        let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
+        trafficLight.statusGreen = tl['green'];
+        trafficLight.statusChange = tl['dateTime'];
+        const data = that.trafficLightDataSource.data;
+        data.unshift(trafficLight);
+        that.trafficLightDataSource.data = data;
       });
       that.ws.subscribe("/movements", function(element) {
         let mvm = JSON.parse(element.body);
@@ -77,5 +77,9 @@ export class InfotableComponent implements OnInit {
       });
     })
   } 
+
+  formatNumber(number: number){
+    return Math.round(number*100)/100;
+  }
 
 }

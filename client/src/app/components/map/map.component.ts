@@ -81,7 +81,7 @@ export class MapComponent implements AfterViewInit {
   }
 
   createMovement(element: any): Movement {
-    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash);
+    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, element.dateTime);
   }
 
   addListenerToMarker(marker: google.maps.Marker, trafficLight: TrafficLight, movement: Movement){

@@ -9,12 +9,13 @@ export class Movement {
     crash: boolean;
     vehicle: Vehicle;
 
-    constructor(vin: string, speed: number, longitude: number, latitude: number, crash: boolean){
+    constructor(vin: string, speed: number, longitude: number, latitude: number, crash: boolean, dateTime: Date){
         this.vin = vin;
         this.speed = speed;
         this.longitude = longitude;
         this.latitude = latitude;
         this.crash = crash;
+        this.dateTime = dateTime;
     }
 
     fullInfo(){
@@ -25,6 +26,7 @@ export class Movement {
                 + 'Longitude: ' + this.longitude + '\n'
                 + 'Latitude: ' + this.latitude + '\n'
                 + 'Crash happened: ' + this.crash + '\n'
+                + 'Last status changed: ' + this.dateTime;
                 
     }
 }

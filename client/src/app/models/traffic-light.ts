@@ -17,6 +17,6 @@ export class TrafficLight {
                 + 'Longitude: ' + this.longitude + '\n'
                 + 'Latitude: ' + this.latitude + '\n'
                 + 'Status: ' + status + '\n'
-                + 'Next status change: ' + this.statusChange
+                + 'Next status change: ' + this.statusChange;
     }
 }
