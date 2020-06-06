@@ -1,13 +1,15 @@
 package at.tuwien.dse.actorcontrolservice.dto;
 
-public class TrafficLight
-{
+public class TrafficLight {
 
     private Long id;
     private Double longitude;
     private Double latitude;
 
-    public TrafficLight(Long id, Double longitude, Double latitude){
+    public TrafficLight() {
+    }
+
+    public TrafficLight(Long id, Double longitude, Double latitude) {
         this.id = id;
         this.longitude = longitude;
         this.latitude = latitude;

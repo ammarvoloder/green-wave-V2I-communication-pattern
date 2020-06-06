@@ -47,12 +47,12 @@ public class ActorControlService {
 
     @PostConstruct
     public void setUp() {
-        findTrafficLights();
+        //findTrafficLights();
         consumeQueue();
     }
 
     private void findTrafficLights() {
-        String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
+        String uri = constructorURIofResource("localhost", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
         List<TrafficLight> list = parseFromRequestResultToList(response.readEntity(String.class));
         list.forEach(t -> trafficLights.put(t.getId(), t));
@@ -70,15 +70,15 @@ public class ActorControlService {
             TrafficLightStatus status;
             Movement movement;
 
-            if (message.getProperties().getMessageId().equals("traffic")) {
+            if (("traffic").equals(message.getProperties().getMessageId())) {
                 status = objectMapper.readValue(msg, TrafficLightStatus.class);
                 statusMap.put(status.getTrafficLightId(), status);
                 LOG.info("Traffic Light status read: " + status);
 
             } else {
                 movement = objectMapper.readValue(msg, Movement.class);
-                isVehicleInRadius(movement, rabbitChannel);
                 LOG.info("Movement read: " + movement);
+                isVehicleInRadius(movement, rabbitChannel);
             }
 
 
@@ -97,7 +97,7 @@ public class ActorControlService {
 
         if (statusMap.isEmpty()) return;
 
-        String uri = constructorURIofResource("actor-registry-service", 40001, "checkRadius", "");
+        String uri = constructorURIofResource("localhost", 40001, "checkRadius", "");
         Response response = client.target(uri)
                 .queryParam("longitude", movement.getLongitude())
                 .queryParam("latitude", movement.getLatitude())
@@ -134,7 +134,7 @@ public class ActorControlService {
 
         LOG.info("Movement in radius of " + trafficLight.toString());
 
-
+        LOG.info(status.toString());
         int distance = calculateDistanceInMeter(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
         long secondsPassed = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.SECONDS);
         long secondsLeft = TRAFFIC_LIGHT_CHANGE - secondsPassed;

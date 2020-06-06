@@ -5,20 +5,14 @@ import at.tuwien.dse.apigateway.dto.TrafficLight;
 import at.tuwien.dse.apigateway.dto.TrafficLightStatus;
 import at.tuwien.dse.apigateway.dto.Vehicle;
 import at.tuwien.dse.apigateway.service.ApiGatewayService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,22 +27,23 @@ public class ApiGatewayController {
     private SimpMessagingTemplate simpMessagingTemplate;
 
     @Autowired
-    ApiGatewayController(SimpMessagingTemplate template){
+    ApiGatewayController(SimpMessagingTemplate template) {
         this.simpMessagingTemplate = template;
     }
 
     /**
      * Rest POST Method - Insert new vehicle
-     * @param producer of vehicle that is going to be stored in the db
+     *
+     * @param producer  of vehicle that is going to be stored in the db
      * @param vehicleID of vehicle that is going to be stored in the db
-     * @param model of vehicle that is going to be stored in the db
+     * @param model     of vehicle that is going to be stored in the db
      * @return Response entity with the status received after vehicle insertion in entity store service
      */
     @PostMapping(path = "/addVehicle")
     public ResponseEntity addVehicle(@RequestParam String producer,
-                                        @RequestParam String vehicleID,
-                                        @RequestParam String model,
-                                        @RequestHeader("id") String headerId) {
+                                     @RequestParam String vehicleID,
+                                     @RequestParam String model,
+                                     @RequestHeader("id") String headerId) {
         LOG.info("Received POST insert vehicle with id: " + vehicleID);
         return apiGatewayService.addVehicle(producer, vehicleID, model, headerId);
     }
@@ -59,7 +54,7 @@ public class ApiGatewayController {
                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
         LOG.info("Get " + id);
         TrafficLightStatus trafficLightStatus = new TrafficLightStatus(green, id, time);
-        this.simpMessagingTemplate.convertAndSend("/trafficLights",  trafficLightStatus);
+        this.simpMessagingTemplate.convertAndSend("/trafficLights", trafficLightStatus);
     }
 
     @PostMapping(path = "/notifySocketMovement")
@@ -68,7 +63,7 @@ public class ApiGatewayController {
                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time,
                                      @RequestParam Double longitude,
                                      @RequestParam Double latitude,
-                                     @RequestParam Boolean crash){
+                                     @RequestParam Boolean crash) {
         LOG.info("Sending movement to socket" + vin);
         Movement movement = new Movement();
         movement.setVin(vin);
@@ -82,6 +77,7 @@ public class ApiGatewayController {
 
     /**
      * Rest GET Method - Get all vehicles to present on the UI
+     *
      * @return Response entity with a list of all vehicles to show to the client and the status received from entity store service
      */
     @GetMapping(path = "/getAllVehicles")
@@ -92,14 +88,14 @@ public class ApiGatewayController {
 
     @PostMapping(path = "/addTrafficLight")
     public ResponseEntity addTrafficLight(@RequestParam Double longitude,
-                                     @RequestParam Double latitude,
+                                          @RequestParam Double latitude,
                                           @RequestParam Long id) {
         LOG.info("Received POST insert traffic light");
-        return apiGatewayService.addTrafficLight(longitude, latitude,id);
+        return apiGatewayService.addTrafficLight(longitude, latitude, id);
     }
 
     @GetMapping(path = "/getAllTrafficLights")
-    public ResponseEntity<List<TrafficLight>> getAllTrafficLights(){
+    public ResponseEntity<List<TrafficLight>> getAllTrafficLights() {
         LOG.info("Recieved GET all traffic lights");
         return apiGatewayService.getAllTrafficLights();
     }

@@ -106,13 +106,13 @@ public class ActorRegistryDAO {
     public Long findIfInRadius(double latitude, double longitude) {
         Position position = new Position(latitude, longitude);
         Point point = new Point(position);
-        MongoCursor<Document> trafficLight = trafficLights.find(and(eq(ID, "s3"), near(LOCATION, point, 1300.0, 0.0))).iterator();
+        MongoCursor<Document> trafficLight = trafficLights.find(and(eq(ID, 3L), near(LOCATION, point, 1300.0, 0.0))).iterator();
 
         if (!trafficLight.hasNext()) {
-            trafficLight = trafficLights.find(and(eq(ID, "s2"), near(LOCATION, point, 700.0, 0.0))).iterator();
+            trafficLight = trafficLights.find(and(eq(ID, 2L), near(LOCATION, point, 700.0, 0.0))).iterator();
 
             if (!trafficLight.hasNext()) {
-                trafficLight = trafficLights.find(and(eq(ID, "s1"), near(LOCATION, point, 1000.0, 0.0))).iterator();
+                trafficLight = trafficLights.find(and(eq(ID, 1L), near(LOCATION, point, 1000.0, 0.0))).iterator();
             }
         }
         return trafficLight.hasNext() ? (Long) trafficLight.next().get(ID) : 0L;
