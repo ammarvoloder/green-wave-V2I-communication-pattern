@@ -18,14 +18,6 @@ public class TrafficLightStatus {
         this.dateTime = dateTime;
     }
 
-    @Override
-    public String toString() {
-        return "TrafficLightStatus{" +
-                "green=" + green +
-                ", trafficLightId=" + trafficLightId +
-                ", dateTime=" + dateTime +
-                '}';
-    }
 
     public boolean isGreen() {
         return green;
@@ -50,8 +42,6 @@ public class TrafficLightStatus {
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
-
-    private LocalDateTime dateTime;
 
     @Override
     public String toString() {
