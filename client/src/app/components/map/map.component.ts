@@ -59,7 +59,7 @@ export class MapComponent implements AfterViewInit {
         const marker = new google.maps.Marker;
         const trafficLight = this.createTrafficLight(element);
         marker.setPosition(coordinates);
-        marker.setIcon(this.redLight);
+        marker.setIcon(element.statusGreen ? this.greenLight : this.redLight);
         marker.setMap(this.map);
         this.addListenerToMarker(marker, trafficLight, null);
         this.trafficLights.push(trafficLight);

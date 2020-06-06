@@ -67,7 +67,10 @@ public class SimulatorComponent {
         try {
             readRoute();
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
-            Thread.sleep(2000);
+            Thread.sleep(20000);
+            pool.execute(new SimulationThread(vehicles.get(1), movements, rabbitChannel));
+            Thread.sleep(30000);
+            pool.execute(new SimulationThread(vehicles.get(2), movements, rabbitChannel));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
