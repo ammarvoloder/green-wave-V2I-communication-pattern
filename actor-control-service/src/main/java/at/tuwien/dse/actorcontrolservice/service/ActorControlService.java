@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ActorControlService {
@@ -35,7 +36,7 @@ public class ActorControlService {
     private ObjectMapper objectMapper;
     private Client client;
     private Map<Long, TrafficLight> trafficLights = new HashMap<>();
-    private Map<Long, TrafficLightStatus> statusMap = new HashMap<>();
+    private ConcurrentHashMap<Long, TrafficLightStatus> statusMap = new ConcurrentHashMap<>();
 
     @Autowired
     public ActorControlService() {
@@ -103,7 +104,10 @@ public class ActorControlService {
                 .request().get();
 
         Long trafficLight = response.readEntity(Long.class);
-        if (trafficLight == 0L) return;
+        if (trafficLight == 0L) {
+            LOG.info("Movement not in radius");
+            return;
+        }
         determineSpeed(movement, trafficLight, rabbitChannel);
 
     }
@@ -128,6 +132,9 @@ public class ActorControlService {
         TrafficLight trafficLight = trafficLights.get(trafficLightId);
         TrafficLightStatus status = statusMap.get(trafficLightId);
 
+        LOG.info("Movement in radius of " + trafficLight.toString());
+
+
         int distance = calculateDistanceInMeter(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
         long secondsPassed = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.SECONDS);
         long secondsLeft = TRAFFIC_LIGHT_CHANGE - secondsPassed;
@@ -145,6 +152,8 @@ public class ActorControlService {
             speed = ((double) distance) / (secondsLeft);
         }
         speed *= 3.6;
+
+        LOG.info("Determined speed " + speed);
 
         // speed can't be greater than 130 and
         // less then 40 if distance to traffic light is still large (> 200m)
