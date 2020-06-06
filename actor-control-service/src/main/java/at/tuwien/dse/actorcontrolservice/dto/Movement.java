@@ -10,6 +10,7 @@ public class Movement {
     private Double longitude;
     private Double latitude;
     private boolean crash;
+    private Double distance;
 
     public String getVin() {
         return vin;
@@ -59,12 +60,25 @@ public class Movement {
         this.crash = crash;
     }
 
+
     @Override
     public String toString() {
         return "Movement{" +
-                "dateTime=" + dateTime +
+                "vin='" + vin + '\'' +
+                ", speed=" + speed +
+                ", dateTime=" + dateTime +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
+                ", crash=" + crash +
+                ", distance=" + distance +
                 '}';
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 }

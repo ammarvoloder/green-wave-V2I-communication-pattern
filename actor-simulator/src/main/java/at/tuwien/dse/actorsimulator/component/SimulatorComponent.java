@@ -60,7 +60,7 @@ public class SimulatorComponent {
 
     @PostConstruct
     public void setUp() {
-        //consumeQueue();
+        consumeQueue();
         createVehicles();
         createTrafficLights();
         try {
@@ -106,9 +106,14 @@ public class SimulatorComponent {
         DeliverCallback speedCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
             Movement movement = objectMapper.readValue(msg, Movement.class);
-            LOG.info("Speed read");
+            LOG.info("Speed read " + movement.getSpeed());
             vehicles.stream().filter(i -> i.getVin().equals(movement.getVin())).findFirst() //
-                    .ifPresent(v -> v.setSpeed(movement.getSpeed()));
+                    .ifPresent(v -> {
+                        v.setSpeed(movement.getSpeed());
+                        v.setSpeedDetermined(true);
+                        if (!v.isSpeedDetermined()) {
+                        }
+                    });
         };
         try {
             LOG.info(rabbitChannel.toString());
