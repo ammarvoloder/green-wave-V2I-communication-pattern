@@ -3,16 +3,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Movement } from '../../models/movement';
 import { TrafficLight } from '../../models/traffic-light';
 import { MatPaginator } from '@angular/material/paginator';
-
-const MOVEMENT_DATA: Movement[] = [
-  {vin: 'Auto1', speed: 60, longitude: 48.0079, latitude: 12.5542, crash: false, dateTime: null, vehicle: null, fullInfo: null},
-  {vin: 'Auto2', speed: 100, longitude: 48.0589, latitude: 12.1525, crash: true,  dateTime: null, vehicle: null, fullInfo: null},
-]
-
-const TRAFFIC_LIGHT_DATA: TrafficLight[] = [
-  {id: 1, longitude: 48.5528, latitude: 12.5142, statusGreen: false, statusChange: null, fullInfo: null},
-  {id: 2, longitude: 48.0589, latitude: 12.1865, statusGreen: true,  statusChange: null, fullInfo: null},
-]
+import * as Stomp from 'stompjs';
+import * as SockJS from 'sockjs-client';
+import { element } from 'protractor';
+import { RestService } from 'src/app/services/rest-service';
 
 @Component({
   selector: 'app-infotable',
@@ -24,18 +18,64 @@ export class InfotableComponent implements OnInit {
   @ViewChild('paginatorOne', {static: true}) movementPaginator: MatPaginator;
   @ViewChild('paginatorTwo', {static: true}) trafficLightPaginator: MatPaginator;
 
-  movementDisplayedColumns: string[] = ['vid', 'speed', 'longitude', 'latitude', 'crash'];
-  movementDataSource = new MatTableDataSource<Movement>(MOVEMENT_DATA);
+  ws: any;
+
+  movementDisplayedColumns: string[] = ['vin', 'speed', 'longitude', 'latitude', 'crash'];
+  movementDataSource = new MatTableDataSource<Movement>();
   trafficLightDisplayedColumns: string[] = ['id', 'longitude', 'latitude', 'status'];
-  trafficLightDataSource = new MatTableDataSource<TrafficLight>(TRAFFIC_LIGHT_DATA);
+  trafficLightDataSource = new MatTableDataSource<TrafficLight>();
+  trafficLights: TrafficLight[] = [];
   
 
-  constructor() { 
+  constructor(private restService: RestService) { 
   }
 
   ngOnInit(): void {
     this.trafficLightDataSource.paginator = this.trafficLightPaginator;
     this.movementDataSource.paginator = this.movementPaginator;
+    this.getAllTrafficLights();
+    this.initSocketConnections();
   }
+
+  getAllTrafficLights() {
+    this.restService.getAllTrafficLights().subscribe(response => {
+      response.forEach(element => {
+        const trafficLight = this.createTrafficLight(element);
+        this.trafficLights.push(trafficLight);
+      })
+    });
+  }
+
+  createMovement(element: any): Movement {
+    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash);
+  }
+
+  createTrafficLight(element: any){
+    return new TrafficLight(element.id, element.longitude, element.latitude);
+  }
+
+  initSocketConnections(){
+    let ws = new SockJS("http://localhost:10113/ws");
+    this.ws = Stomp.over(ws);
+    let that = this;
+    this.ws.connect({}, function(frame) {
+      that.ws.subscribe("/trafficLights", function(element) {
+          let tl = JSON.parse(element.body);
+          let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
+          trafficLight.statusGreen = tl['green'];
+          trafficLight.statusChange = tl['dateTime'];
+          const data = that.trafficLightDataSource.data;
+          data.unshift(trafficLight);
+          that.trafficLightDataSource.data = data;
+      });
+      that.ws.subscribe("/movements", function(element) {
+        let mvm = JSON.parse(element.body);
+        const movement = that.createMovement(mvm);
+        const data = that.movementDataSource.data;
+        data.unshift(movement);
+        that.movementDataSource.data = data;     
+      });
+    })
+  } 
 
 }
