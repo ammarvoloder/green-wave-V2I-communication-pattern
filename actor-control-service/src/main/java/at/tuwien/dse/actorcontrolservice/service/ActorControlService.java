@@ -1,5 +1,6 @@
 package at.tuwien.dse.actorcontrolservice.service;
 
+import at.tuwien.dse.actorcontrolservice.dao.ActorControlDAO;
 import at.tuwien.dse.actorcontrolservice.dto.Movement;
 import at.tuwien.dse.actorcontrolservice.dto.TrafficLight;
 import at.tuwien.dse.actorcontrolservice.dto.TrafficLightStatus;
@@ -34,13 +35,14 @@ public class ActorControlService {
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlService.class);
     private static final String ACTOR_QUEUE = "actor_queue";
 
+    @Autowired
+    private ActorControlDAO actorControlDAO;
     private ObjectMapper objectMapper;
     private Client client;
     private Map<Long, TrafficLight> trafficLights = new HashMap<>();
     private ConcurrentHashMap<Long, TrafficLightStatus> statusMap = new ConcurrentHashMap<>();
     private Map<String, Long> vehicleProvidedSpeed = new HashMap<>();
 
-    @Autowired
     public ActorControlService() {
         client = ClientBuilder.newClient();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -146,7 +148,7 @@ public class ActorControlService {
         if (status.isGreen()) {
             LOG.info("Current traffic light status: green");
             // if green try to reach green light with max speed (130 km/h)
-            if ((distance / (130 / 3.6)) < secondsLeft) {
+            if ((distance / (130.0 / 3.6)) < secondsLeft) {
                 speed = 130;
             }
             // else wait for next green light
@@ -155,7 +157,13 @@ public class ActorControlService {
             }
         } else {
             LOG.info("Current traffic light status: red");
-            speed = ((double) distance) / (secondsLeft);
+            long minTime = (long) (distance / (130.0 / 3.6));
+            // try to reach next green with max speed
+            if (minTime > secondsLeft && minTime < (secondsLeft + 10)) {
+                speed = 130;
+            } else {
+                speed = ((double) distance) / (secondsLeft);
+            }
         }
         speed *= 3.6;
 
@@ -173,6 +181,7 @@ public class ActorControlService {
         movement.setSpeed(speed);
         String msg = objectMapper.writeValueAsString(movement);
         rabbitChannel.getChannel().basicPublish("", "speed_queue", null, msg.getBytes());
+        actorControlDAO.addMovement(movement);
     }
 
     private <T> List<T> parseFromRequestResultToList(String requestResult) {
