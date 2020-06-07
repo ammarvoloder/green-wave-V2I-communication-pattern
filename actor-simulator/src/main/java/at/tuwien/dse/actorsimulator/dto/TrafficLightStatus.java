@@ -6,6 +6,7 @@ public class TrafficLightStatus {
 
     private boolean green;
     private Long trafficLightId;
+    private LocalDateTime dateTime;
 
     public TrafficLightStatus(){
 
@@ -40,5 +41,5 @@ public class TrafficLightStatus {
         this.dateTime = dateTime;
     }
 
-    private LocalDateTime dateTime;
+
 }
