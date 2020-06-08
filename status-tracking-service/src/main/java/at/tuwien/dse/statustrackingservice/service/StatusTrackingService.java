@@ -36,8 +36,7 @@ public class StatusTrackingService {
         this.statusTrackingDAO = statusTrackingDAO;
     }
 
-    // construct and return URI of the request for all REST request in one method
-    private static String constructorURIofResource(String host, int port, String methodName, String pathParam) {
+    private static String createTargetForRequest(String host, int port, String methodName, String pathParam) {
         StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
         if (!pathParam.isEmpty()) {
             stringBuilder.append("/").append(pathParam);
@@ -53,7 +52,7 @@ public class StatusTrackingService {
                 TrafficLightStatus status = objectMapper.readValue(msg, TrafficLightStatus.class);
                 LOG.info("Traffic Light status read: " + status);
                 statusTrackingDAO.addTrafficLightStatus(status);
-                String uri = constructorURIofResource("localhost", 10113, "notifySocketTLStatus", "");
+                String uri = createTargetForRequest("localhost", 10113, "notifySocketTLStatus", "");
                 Response response = client.target(uri).queryParam("green", status.isGreen())
                         .queryParam("id", status.getTrafficLightId())
                         .queryParam("time", status.getDateTime())
@@ -64,7 +63,7 @@ public class StatusTrackingService {
                 Movement movement = objectMapper.readValue(msg, Movement.class);
                 LOG.info("Movement read: " + movement);
                 statusTrackingDAO.addMovement(movement);
-                String uri = constructorURIofResource("localhost", 10113, "notifySocketMovement", "");
+                String uri = createTargetForRequest("localhost", 10113, "notifySocketMovement", "");
                 Response response = client.target(uri).queryParam("vin", movement.getVin())
                         .queryParam("speed", movement.getSpeed())
                         .queryParam("time", movement.getDateTime())

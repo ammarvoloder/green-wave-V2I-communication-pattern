@@ -59,7 +59,7 @@ public class ActorControlService {
     private void findTrafficLights() {
         String uri = constructorURIofResource("localhost", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
-        List<TrafficLight> list = parseFromRequestResultToList(response.readEntity(String.class));
+        List<TrafficLight> list = parseJsonToList(response.readEntity(String.class));
         list.forEach(t -> trafficLights.put(t.getId(), t));
     }
 
@@ -221,7 +221,7 @@ public class ActorControlService {
         actorControlDAO.addMovement(movement);
     }
 
-    private <T> List<T> parseFromRequestResultToList(String requestResult) {
+    private <T> List<T> parseJsonToList(String requestResult) {
         LOG.info("Sending request: " + requestResult);
         List<T> resultList = new ArrayList<>();
         try {
