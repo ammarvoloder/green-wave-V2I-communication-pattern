@@ -18,6 +18,7 @@ public class StatusScheduler implements Runnable {
     private static final String MOVEMENT_STATUS_EXCHANGE = "movement_status";
 
     private List<TrafficLightStatus> trafficLightStatuses;
+    private TrafficLightStatus trafficLightStatus;
     private RabbitChannel rabbitChannel;
     private ObjectMapper objectMapper;
 
@@ -29,20 +30,43 @@ public class StatusScheduler implements Runnable {
 
     }
 
+    public StatusScheduler(TrafficLightStatus trafficLightStatus, RabbitChannel rabbitChannel) {
+        this.rabbitChannel = rabbitChannel;
+        this.trafficLightStatus = trafficLightStatus;
+        this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    }
+
     @Override
     public void run() {
-        LOG.info("Sendig status at fixed rate...");
-        trafficLightStatuses.forEach(trafficLight -> {
-            trafficLight.setGreen(!trafficLight.isGreen());
-            trafficLight.setDateTime(LocalDateTime.now());
-            String msg;
+        if (trafficLightStatus == null) {
+            LOG.info("Sendig status at fixed rate...");
+            trafficLightStatuses.forEach(trafficLight -> {
+                if (trafficLight.isManualAdjusted()) {
+                    trafficLight.setManualAdjusted(false);
+                    return;
+                }
+                trafficLight.setGreen(!trafficLight.isGreen());
+                trafficLight.setDateTime(LocalDateTime.now());
+                try {
+                    String msg = objectMapper.writeValueAsString(trafficLight);
+                    AMQP.BasicProperties messageId = new AMQP.BasicProperties().builder().messageId("traffic").build();
+                    rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", messageId, msg.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            LOG.info("Sending status after NCE event...");
+            trafficLightStatus.setGreen(true);
+            trafficLightStatus.setDateTime(LocalDateTime.now());
+            trafficLightStatus.setManualAdjusted(true);
             try {
-                msg = objectMapper.writeValueAsString(trafficLight);
-                AMQP.BasicProperties messaageId = new AMQP.BasicProperties().builder().messageId("traffic").build();
-                rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", messaageId, msg.getBytes());
+                String msg = objectMapper.writeValueAsString(trafficLightStatus);
+                AMQP.BasicProperties messageId = new AMQP.BasicProperties().builder().messageId("traffic").build();
+                rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", messageId, msg.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
     }
 }

@@ -36,10 +36,24 @@ public class SimulationThread implements Runnable {
                 movement.setSpeed(vehicle.getSpeed());
                 movement.setVin(vehicle.getVin());
                 movement.setDateTime(LocalDateTime.now());
-                movement.setCrash(false);
+                if (movement.isCrash()) {
+                    movement.setSpeed(0);
+                    vehicle.setSpeed(0.0);
+                    LOG.info("NCE Event recognized!");
+                }
                 String msg = objectMapper.writeValueAsString(movement);
                 LOG.info("Getting vehicle's speed: " + vehicle.getSpeed());
                 rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", null, msg.getBytes());
+                // movement still has crash/NCE flag so that backend can apply custom logic
+                if (movement.isCrash()) {
+                    Thread.sleep(20000);
+                    movement.setSpeed(50.0);
+                    movement.setDateTime(LocalDateTime.now());
+                    vehicle.setSpeed(50.0);
+                    msg = objectMapper.writeValueAsString(movement);
+                    LOG.info("Getting vehicle's speed: " + vehicle.getSpeed());
+                    rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", null, msg.getBytes());
+                }
                 double speed = movement.getSpeed() / 3.6;
                 long timeToWait = (long) (movement.getDistance() / speed * 1000);
                 Thread.sleep(timeToWait);

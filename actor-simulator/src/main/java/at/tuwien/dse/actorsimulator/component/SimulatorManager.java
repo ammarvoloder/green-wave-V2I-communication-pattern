@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -29,11 +30,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @ManagedBean
-public class SimulatorComponent {
+public class SimulatorManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimulatorComponent.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimulatorManager.class);
     private ExecutorService pool = Executors.newFixedThreadPool(3);
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService crashScheduler = Executors.newScheduledThreadPool(3);
 
 
     private SimulatorService simulatorService;
@@ -45,7 +47,7 @@ public class SimulatorComponent {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public SimulatorComponent(SimulatorService simulatorService) {
+    public SimulatorManager(SimulatorService simulatorService) {
         this.rabbitChannel = new RabbitChannel();
         this.simulatorService = simulatorService;
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -66,8 +68,8 @@ public class SimulatorComponent {
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
             Thread.sleep(15000);
             pool.execute(new SimulationThread(vehicles.get(1), movements, rabbitChannel));
-            Thread.sleep(15000);
-            pool.execute(new SimulationThread(vehicles.get(2), movements, rabbitChannel));
+            //Thread.sleep(15000);
+            //pool.execute(new SimulationThread(vehicles.get(2), movements, rabbitChannel));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -90,10 +92,26 @@ public class SimulatorComponent {
     private void consumeQueue() {
         DeliverCallback speedCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-            Movement movement = objectMapper.readValue(msg, Movement.class);
-            LOG.info("Speed read " + movement.getSpeed());
-            vehicles.stream().filter(i -> i.getVin().equals(movement.getVin())).findFirst() //
-                    .ifPresent(v -> v.setSpeed(movement.getSpeed()));
+
+            TrafficLightStatus status;
+            Movement movement;
+
+            if (("traffic").equals(message.getProperties().getMessageId())) {
+                status = objectMapper.readValue(msg, TrafficLightStatus.class);
+                TrafficLightStatus stati = trafficLightStatuses.stream().filter(s -> s.getTrafficLightId().equals(status.getTrafficLightId()))  //
+                        .findFirst().orElse(null);
+                long time = LocalDateTime.now().until(status.getDateTime(), ChronoUnit.SECONDS);
+                if (stati != null) {
+                    LOG.info("Starting scheduler for manual status change");
+                    crashScheduler.schedule(new StatusScheduler(stati, rabbitChannel), time, TimeUnit.SECONDS);
+                }
+                LOG.info("Traffic Light status read for NCE event: " + status);
+            } else {
+                movement = objectMapper.readValue(msg, Movement.class);
+                vehicles.stream().filter(i -> i.getVin().equals(movement.getVin())).findFirst() //
+                        .ifPresent(v -> v.setSpeed(movement.getSpeed()));
+                LOG.info("Speed read " + movement.getSpeed());
+            }
         };
         try {
             LOG.info(rabbitChannel.toString());
@@ -116,6 +134,9 @@ public class SimulatorComponent {
             movement.setLongitude(Double.parseDouble(arrayLine[0]));
             movement.setLatitude(Double.parseDouble(arrayLine[1]));
             movement.setDistance(Double.parseDouble(arrayLine[2]));
+            if (arrayLine.length > 3 && arrayLine[3].equals("NCE")) {
+                movement.setCrash(true);
+            }
             this.movements.add(movement);
         }
     }

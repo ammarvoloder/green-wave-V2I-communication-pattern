@@ -1,5 +1,7 @@
 package at.tuwien.dse.actorsimulator.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 public class TrafficLightStatus {
@@ -7,10 +9,13 @@ public class TrafficLightStatus {
     private boolean green;
     private Long trafficLightId;
     private LocalDateTime dateTime;
+    @JsonIgnore
+    private boolean manualAdjusted;
 
-    public TrafficLightStatus(){
+    public TrafficLightStatus() {
 
     }
+
     public TrafficLightStatus(boolean green, Long trafficLightId, LocalDateTime dateTime) {
         this.green = green;
         this.trafficLightId = trafficLightId;
@@ -42,4 +47,20 @@ public class TrafficLightStatus {
     }
 
 
+    @Override
+    public String toString() {
+        return "TrafficLightStatus{" +
+                "green=" + green +
+                ", trafficLightId=" + trafficLightId +
+                ", dateTime=" + dateTime +
+                '}';
+    }
+
+    public boolean isManualAdjusted() {
+        return manualAdjusted;
+    }
+
+    public void setManualAdjusted(boolean manualAdjusted) {
+        this.manualAdjusted = manualAdjusted;
+    }
 }

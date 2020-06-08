@@ -1,11 +1,10 @@
-import { Component, OnInit, ViewChild, NgZone, ElementRef, AfterViewInit } from '@angular/core';
-import { TrafficLight } from 'src/app/models/traffic-light';
-import { RestService } from 'src/app/services/rest-service';
+import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import {TrafficLight} from 'src/app/models/traffic-light';
+import {RestService} from 'src/app/services/rest-service';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
-import { Movement } from 'src/app/models/movement';
-import { Vehicle } from 'src/app/models/vehicle';
-import { element } from 'protractor';
+import {Movement} from 'src/app/models/movement';
+import {Vehicle} from 'src/app/models/vehicle';
 
 @Component({
   selector: 'app-map',
@@ -14,14 +13,14 @@ import { element } from 'protractor';
 })
 export class MapComponent implements AfterViewInit {
   @ViewChild('mapContainer', {static: false}) gmap: ElementRef;
-  
+
   map: google.maps.Map;
   coordinates = new google.maps.LatLng(48.16411, 16.34629);
 
   mapOptions: google.maps.MapOptions = {
     center: this.coordinates,
     zoom: 14.5
-   };
+  };
 
   trafficLights: TrafficLight[] = [];
   movements: Movement[] = [];
@@ -30,14 +29,16 @@ export class MapComponent implements AfterViewInit {
   redLight = 'assets/images/red.png';
   greenLight = 'assets/images/green.png';
   car = 'assets/images/car.png';
+  crash = 'assets/images/crash.png';
   infoContent: string;
   trafficLightMarkerMap: Map<Number, google.maps.Marker>;
   trafficLightInfoWindowMap: Map<Number, google.maps.InfoWindow>;
   movementMarkerMap: Map<String, google.maps.Marker>;
   movementInfoWindowMap: Map<String, google.maps.InfoWindow>;
+  crashMarker: google.maps.Marker;
 
 
-  constructor(private restService: RestService) { 
+  constructor(private restService: RestService) {
     this.trafficLightMarkerMap = new Map();
     this.trafficLightInfoWindowMap = new Map();
     this.movementMarkerMap = new Map();
@@ -51,8 +52,8 @@ export class MapComponent implements AfterViewInit {
     this.initSocketConnections();
   }
 
-  mapInitializer(){
-    this.map = new google.maps.Map(this.gmap.nativeElement, 
+  mapInitializer() {
+    this.map = new google.maps.Map(this.gmap.nativeElement,
       this.mapOptions);
   }
 
@@ -88,76 +89,85 @@ export class MapComponent implements AfterViewInit {
     return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, element.dateTime);
   }
 
-  addListenerToMarker(marker: google.maps.Marker, trafficLight: TrafficLight, movement: Movement){
+  addListenerToMarker(marker: google.maps.Marker, trafficLight: TrafficLight, movement: Movement) {
     let infoWindow: google.maps.InfoWindow;
-    if(trafficLight){
+    if (trafficLight) {
       var content = `<span style="white-space: pre;">${trafficLight.fullInfo()}</span>`;
       infoWindow = this.trafficLightInfoWindowMap.get(trafficLight.id);
     } else {
       var content = `<span style="white-space: pre;">${movement.fullInfo()}</span>`;
       infoWindow = this.movementInfoWindowMap.get(movement.vin);
     }
-    if(!infoWindow) {
+    if (!infoWindow) {
       infoWindow = new google.maps.InfoWindow();
     }
     infoWindow.setContent(content);
     marker.addListener('click', () => {
       infoWindow.open(marker.getMap(), marker);
-      setTimeout(function(){infoWindow.close();}, 10000);
+      setTimeout(function () {
+        infoWindow.close();
+      }, 10000);
     });
     trafficLight ? this.trafficLightInfoWindowMap.set(trafficLight.id, infoWindow) : this.movementInfoWindowMap.set(movement.vin, infoWindow);
   }
 
-  removeMovementeMarker(movement:Movement) {
+  removeMovementeMarker(movement: Movement) {
     let marker = this.movementMarkerMap.get(movement.vin);
-    if(marker){
+    if (marker) {
       marker.setMap(null);
       this.movementMarkerMap.delete(movement.vin);
-    }  
+    }
   }
 
-  removeTrafficLightMarker(trafficLight:TrafficLight) {
+  removeTrafficLightMarker(trafficLight: TrafficLight) {
     let marker = this.trafficLightMarkerMap.get(trafficLight.id);
-    if(marker){
+    if (marker) {
       marker.setMap(null);
       this.trafficLightMarkerMap.delete(trafficLight.id);
     }
   }
-  
-  initSocketConnections(){
+
+  initSocketConnections() {
     let ws = new SockJS("http://localhost:10113/ws");
     this.ws = Stomp.over(ws);
     let that = this;
-    this.ws.connect({}, function(frame) {
-      that.ws.subscribe("/trafficLights", function(element) {
-          let tl = JSON.parse(element.body);
-          let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
-          let index = that.trafficLights.indexOf(trafficLight);
-          trafficLight.statusGreen = tl['green'];
-          trafficLight.statusChange = tl['dateTime'];
-          that.trafficLights[index] = trafficLight;
-          var coordinates = new google.maps.LatLng(trafficLight.latitude, trafficLight.longitude);
-          const marker = new google.maps.Marker;
-          marker.setPosition(coordinates);
-          marker.setIcon(trafficLight.statusGreen ? that.greenLight : that.redLight);
-          marker.setMap(that.map);
-          that.addListenerToMarker(marker, trafficLight, null);
-          that.removeTrafficLightMarker(trafficLight);
-          that.trafficLightMarkerMap.set(trafficLight.id, marker);
+    this.ws.connect({}, function (frame) {
+      that.ws.subscribe("/trafficLights", function (element) {
+        let tl = JSON.parse(element.body);
+        let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
+        let index = that.trafficLights.indexOf(trafficLight);
+        trafficLight.statusGreen = tl['green'];
+        trafficLight.statusChange = tl['dateTime'];
+        that.trafficLights[index] = trafficLight;
+        var coordinates = new google.maps.LatLng(trafficLight.latitude, trafficLight.longitude);
+        const marker = new google.maps.Marker;
+        marker.setPosition(coordinates);
+        marker.setIcon(trafficLight.statusGreen ? that.greenLight : that.redLight);
+        marker.setMap(that.map);
+        that.addListenerToMarker(marker, trafficLight, null);
+        that.removeTrafficLightMarker(trafficLight);
+        that.trafficLightMarkerMap.set(trafficLight.id, marker);
 
       });
-      that.ws.subscribe("/movements", function(element) {
+      that.ws.subscribe("/movements", function (element) {
         let mvm = JSON.parse(element.body);
         let movement = that.createMovement(mvm);
         let vehicle = that.vehicles.find(v => v.vin === movement.vin);
         movement.vehicle = vehicle;
         var coordinates = new google.maps.LatLng(movement.latitude, movement.longitude);
         let marker = that.movementMarkerMap.get(movement.vin);
-        if(marker){
+        if (movement.crash && that.crashMarker == null) {
+          that.crashMarker = new google.maps.Marker();
+          that.crashMarker.setPosition(coordinates);
+          that.crashMarker.setIcon(that.crash);
+          that.crashMarker.setMap(that.map);
+          that.crashMarker.setZIndex(marker.getZIndex() - 1)
+        }
+        if (marker) {
           marker.setPosition(coordinates);
           that.addListenerToMarker(marker, null, movement);
-        }else{ 
-          marker = new google.maps.Marker;
+        } else {
+          marker = new google.maps.Marker();
           marker.setPosition(coordinates);
           marker.setIcon(that.car);
           marker.setMap(that.map);
@@ -167,5 +177,5 @@ export class MapComponent implements AfterViewInit {
         }
       });
     })
-  } 
+  }
 }

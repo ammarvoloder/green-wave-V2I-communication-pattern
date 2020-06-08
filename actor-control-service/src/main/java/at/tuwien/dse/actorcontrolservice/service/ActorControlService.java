@@ -7,6 +7,7 @@ import at.tuwien.dse.actorcontrolservice.dto.TrafficLightStatus;
 import at.tuwien.dse.actorcontrolservice.rabbit.RabbitChannel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DeliverCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,10 +113,46 @@ public class ActorControlService {
             return;
         }
         if (trafficLight.equals(vehicleProvidedSpeed.get(movement.getVin()))) {
-            LOG.info("Traffic light " + trafficLight + " already provided speed to " + movement.getVin());
+            if (movement.isCrash() && movement.getSpeed() == 0) {
+                LOG.info("Movement with crash and speed 0 recognized!");
+            } else if (movement.isCrash() && movement.getSpeed() == 50) {
+                LOG.info("Movement with crash and speed 50.0 recognized!");
+                timeForManualActivation(rabbitChannel, movement, trafficLight);
+            } else {
+                LOG.info("Traffic light " + trafficLight + " already provided speed to " + movement.getVin());
+            }
             return;
         }
         determineSpeed(movement, trafficLight, rabbitChannel);
+    }
+
+    private void timeForManualActivation(RabbitChannel rabbitChannel, Movement movement, Long trafficLightId) throws IOException {
+        TrafficLight trafficLight = trafficLights.get(trafficLightId);
+        TrafficLightStatus status = statusMap.get(trafficLightId);
+
+        int distance = calculateDistanceInMeter(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
+        long secondsPassed = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.SECONDS);
+        long secondsLeft = TRAFFIC_LIGHT_CHANGE - secondsPassed;
+
+        long timeUnitTL = (long) (distance / movement.getSpeed());
+        LOG.info("Starting manual determination..");
+        // if green and no need for manual traffic light activation
+        if (status.isGreen() && secondsLeft > timeUnitTL) {
+            LOG.info("Vehicle will made it after NCE event! Current status: Green!");
+            return;
+        }
+        // if red but still getting on green wave with 50 km/h
+        if (!status.isGreen() && secondsLeft <= timeUnitTL && (secondsLeft + TRAFFIC_LIGHT_CHANGE) > timeUnitTL) {
+            LOG.info("Vehicle will made it after NCE event! Current status: Red!");
+            return;
+        }
+        LOG.info("Set traffic light status manually");
+        status.setDateTime(LocalDateTime.now().plusSeconds(timeUnitTL));
+
+        AMQP.BasicProperties messageId = new AMQP.BasicProperties().builder().messageId("traffic").build();
+        String msg = objectMapper.writeValueAsString(status);
+        rabbitChannel.getChannel().basicPublish("", "speed_queue", messageId, msg.getBytes());
+
     }
 
     public int calculateDistanceInMeter(double userLat, double userLng,
@@ -170,8 +207,8 @@ public class ActorControlService {
         LOG.info("Determined speed " + speed);
 
         // speed can't be greater than 130 and
-        // less then 40 if distance to traffic light is still large (> 300m)
-        if (speed > 130 || (speed < 40 && distance > 300)) {
+        // less then 40 if distance to traffic light is still large (> 500m)
+        if (speed > 130 || (speed < 40 && distance > 600)) {
             return;
         }
 
