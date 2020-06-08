@@ -12,11 +12,12 @@ export class TrafficLight {
     }
 
     fullInfo(){
-        let status = this.statusGreen ? 'GREEN' : 'RED';
+        const status = this.statusGreen ? 'GREEN' : 'RED';
+        const statusChange = this.statusChange ? this.statusChange.toUTCString() : "Not activated yet"
         return 'ID: ' + this.id + '\n'
                 + 'Longitude: ' + this.longitude + '\n'
                 + 'Latitude: ' + this.latitude + '\n'
                 + 'Status: ' + status + '\n'
-                + 'Next status change: ' + this.statusChange;
+                + 'Next status change: ' + statusChange;
     }
 }

@@ -22,11 +22,10 @@ export class Movement {
         return 'VIN: ' + this.vin + '\n'
                 + 'Model: ' + this.vehicle.model + '\n'
                 + 'Producer: ' + this.vehicle.producer + '\n'
-                + 'Speed: ' + this.speed + 'km/h \n'
+                + 'Speed: ' + Math.round(this.speed * 100)/100 + 'km/h \n'
                 + 'Longitude: ' + this.longitude + '\n'
                 + 'Latitude: ' + this.latitude + '\n'
                 + 'Crash happened: ' + this.crash + '\n'
-                + 'Last status changed: ' + this.dateTime;
-                
+                + 'Last status changed: ' + this.dateTime.toUTCString();            
     }
 }

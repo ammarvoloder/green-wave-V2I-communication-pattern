@@ -86,7 +86,7 @@ export class MapComponent implements AfterViewInit {
   }
 
   createMovement(element: any): Movement {
-    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, element.dateTime);
+    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, new Date(element.dateTime));
   }
 
   addListenerToMarker(marker: google.maps.Marker, trafficLight: TrafficLight, movement: Movement) {
@@ -137,7 +137,7 @@ export class MapComponent implements AfterViewInit {
         let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
         let index = that.trafficLights.indexOf(trafficLight);
         trafficLight.statusGreen = tl['green'];
-        trafficLight.statusChange = tl['dateTime'];
+        trafficLight.statusChange = new Date(tl['dateTime']);
         that.trafficLights[index] = trafficLight;
         var coordinates = new google.maps.LatLng(trafficLight.latitude, trafficLight.longitude);
         const marker = new google.maps.Marker;

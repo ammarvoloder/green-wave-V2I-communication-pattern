@@ -47,7 +47,7 @@ export class InfotableComponent implements OnInit {
   }
 
   createMovement(element: any): Movement {
-    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, element.dateTime);
+    return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, new Date(element.dateTime));
   }
 
   createTrafficLight(element: any){
@@ -63,9 +63,11 @@ export class InfotableComponent implements OnInit {
         let tl = JSON.parse(element.body);
         let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
         trafficLight.statusGreen = tl['green'];
-        trafficLight.statusChange = tl['dateTime'];
+        trafficLight.statusChange = new Date(tl['dateTime']);
+        console.log(trafficLight)
         const data = that.trafficLightDataSource.data;
-        data.unshift(trafficLight);
+        const index = data.indexOf(trafficLight);
+        index == -1 ? data.unshift(trafficLight) : console.log("tu sam usla");
         that.trafficLightDataSource.data = data;
       });
       that.ws.subscribe("/movements", function(element) {
