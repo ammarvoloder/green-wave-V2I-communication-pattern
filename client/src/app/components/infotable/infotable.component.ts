@@ -1,12 +1,11 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { Movement } from '../../models/movement';
-import { TrafficLight } from '../../models/traffic-light';
-import { MatPaginator } from '@angular/material/paginator';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {MatTableDataSource} from '@angular/material/table';
+import {Movement} from '../../models/movement';
+import {TrafficLight} from '../../models/traffic-light';
+import {MatPaginator} from '@angular/material/paginator';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
-import { element } from 'protractor';
-import { RestService } from 'src/app/services/rest-service';
+import {RestService} from 'src/app/services/rest-service';
 
 @Component({
   selector: 'app-infotable',
@@ -20,20 +19,20 @@ export class InfotableComponent implements OnInit {
 
   ws: any;
 
-  movementDisplayedColumns: string[] = ['vin', 'speed', 'longitude', 'latitude', 'crash', 'statusChange' ];
+  movementDisplayedColumns: string[] = ['vin', 'speed', 'longitude', 'latitude', 'crash', 'statusChange'];
   movementDataSource = new MatTableDataSource<Movement>();
   trafficLightDisplayedColumns: string[] = ['id', 'longitude', 'latitude', 'status', 'statusChange'];
   trafficLightDataSource = new MatTableDataSource<TrafficLight>();
   trafficLights: TrafficLight[] = [];
-  
 
-  constructor(private restService: RestService) { 
+
+  constructor(private restService: RestService) {
   }
 
   ngOnInit(): void {
     this.trafficLightDataSource.paginator = this.trafficLightPaginator;
     this.movementDataSource.paginator = this.movementPaginator;
-    this.getAllTrafficLights();
+    this.getCoreData();
     this.initSocketConnections();
   }
 
@@ -50,16 +49,16 @@ export class InfotableComponent implements OnInit {
     return new Movement(element.vin, element.speed, element.longitude, element.latitude, element.crash, element.dateTime);
   }
 
-  createTrafficLight(element: any){
+  createTrafficLight(element: any) {
     return new TrafficLight(element.id, element.longitude, element.latitude);
   }
 
-  initSocketConnections(){
+  initSocketConnections() {
     let ws = new SockJS("http://localhost:10113/ws");
     this.ws = Stomp.over(ws);
     let that = this;
-    this.ws.connect({}, function(frame) {
-      that.ws.subscribe("/trafficLights", function(element) {
+    this.ws.connect({}, function (frame) {
+      that.ws.subscribe("/trafficLights", function (element) {
         let tl = JSON.parse(element.body);
         let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
         trafficLight.statusGreen = tl['green'];
@@ -68,18 +67,27 @@ export class InfotableComponent implements OnInit {
         data.unshift(trafficLight);
         that.trafficLightDataSource.data = data;
       });
-      that.ws.subscribe("/movements", function(element) {
+      that.ws.subscribe("/movements", function (element) {
         let mvm = JSON.parse(element.body);
         const movement = that.createMovement(mvm);
         const data = that.movementDataSource.data;
         data.unshift(movement);
-        that.movementDataSource.data = data;     
+        that.movementDataSource.data = data;
       });
     })
-  } 
+  }
 
-  formatNumber(number: number){
-    return Math.round(number*100)/100;
+  formatNumber(number: number) {
+    return Math.round(number * 100) / 100;
+  }
+
+  private getCoreData() {
+    let intervalId = setInterval(() => {
+      if (this.trafficLights.length !== 0) {
+        clearInterval(intervalId);
+      }
+      this.getAllTrafficLights();
+    }, 1000);
   }
 
 }

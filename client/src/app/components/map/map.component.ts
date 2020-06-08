@@ -47,8 +47,7 @@ export class MapComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.mapInitializer();
-    this.getAllTrafficLights();
-    this.getAllVehicles();
+    this.getCoreData();
     this.initSocketConnections();
   }
 
@@ -177,5 +176,15 @@ export class MapComponent implements AfterViewInit {
         }
       });
     })
+  }
+
+  private getCoreData() {
+    let intervalId = setInterval(() => {
+      if (this.vehicles.length !== 0 && this.trafficLights.length !== 0) {
+        clearInterval(intervalId);
+      }
+      this.getAllTrafficLights();
+      this.getAllVehicles()
+    }, 1000);
   }
 }

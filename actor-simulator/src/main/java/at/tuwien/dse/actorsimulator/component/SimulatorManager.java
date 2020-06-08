@@ -63,7 +63,10 @@ public class SimulatorManager {
         createVehicles();
         createTrafficLights();
         try {
+            // wait little bit for frontend to load core data before real simulation
+            Thread.sleep(3000);
             scheduler.scheduleAtFixedRate(new StatusScheduler(trafficLightStatuses, rabbitChannel), 0, 10, TimeUnit.SECONDS);
+            Thread.sleep(3000);
             readRoute();
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
             Thread.sleep(15000);
