@@ -48,6 +48,7 @@ public class SimulationThread implements Runnable {
                 if (movement.isCrash()) {
                     Thread.sleep(20000);
                     movement.setSpeed(50.0);
+                    movement.setVin(vehicle.getVin());
                     movement.setDateTime(LocalDateTime.now());
                     vehicle.setSpeed(50.0);
                     msg = objectMapper.writeValueAsString(movement);

@@ -56,7 +56,7 @@ public class StatusScheduler implements Runnable {
                 }
             });
         } else {
-            LOG.info("Sending status after NCE event...");
+            LOG.info("Turning green light manually because of NCE \n");
             trafficLightStatus.setGreen(true);
             trafficLightStatus.setDateTime(LocalDateTime.now());
             trafficLightStatus.setManualAdjusted(true);

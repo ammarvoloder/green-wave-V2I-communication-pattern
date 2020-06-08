@@ -68,8 +68,8 @@ public class SimulatorManager {
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
             Thread.sleep(15000);
             pool.execute(new SimulationThread(vehicles.get(1), movements, rabbitChannel));
-            //Thread.sleep(15000);
-            //pool.execute(new SimulationThread(vehicles.get(2), movements, rabbitChannel));
+            Thread.sleep(15000);
+            pool.execute(new SimulationThread(vehicles.get(2), movements, rabbitChannel));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

@@ -133,8 +133,8 @@ public class ActorControlService {
         int distance = calculateDistanceInMeter(movement.getLatitude(), movement.getLongitude(), trafficLight.getLatitude(), trafficLight.getLongitude());
         long secondsPassed = status.getDateTime().until(LocalDateTime.now(), ChronoUnit.SECONDS);
         long secondsLeft = TRAFFIC_LIGHT_CHANGE - secondsPassed;
-
-        long timeUnitTL = (long) (distance / movement.getSpeed());
+        long timeUnitTL = (long) (distance / (movement.getSpeed() / 3.6));
+        LOG.info("Distance: {}  Speed: {}   Manual time: {}", distance, movement.getSpeed(), timeUnitTL);
         LOG.info("Starting manual determination..");
         // if green and no need for manual traffic light activation
         if (status.isGreen() && secondsLeft > timeUnitTL) {
