@@ -29,10 +29,15 @@ public class ApiGatewayService {
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
-    // TESTING PURPOSES
-    public ApiGatewayService(Client client) {
-        this.client = client;
+
+    private static String createTargetForRequest(String host, int port, String methodName, String pathParam) {
+        StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
+        if (!pathParam.isEmpty()) {
+            stringBuilder.append("/").append(pathParam);
+        }
+        return stringBuilder.toString();
     }
+
     /**
      * Forward call to insert vehicle to the entity store service and then dao
      *
@@ -44,7 +49,7 @@ public class ApiGatewayService {
      */
     public ResponseEntity addVehicle(String producer, String vehicleID, String model, String headerId) {
         LOG.info("Send REST request to insert new vehicle with id: " + vehicleID);
-        String uri = constructorURIofResource("localhost", 40001, "addVehicle", "");
+        String uri = createTargetForRequest("localhost", 40001, "addVehicle", "");
         Response response = client.target(uri).queryParam("producer", producer).queryParam("vin", vehicleID).queryParam("model", model)
                 .request()
                 .build("POST")
@@ -53,12 +58,12 @@ public class ApiGatewayService {
         return ResponseEntity.status(response.getStatus()).body("");
     }
 
-    public ResponseEntity addTrafficLight(Double longitude, Double latitude, Long id){
+    public ResponseEntity addTrafficLight(Double longitude, Double latitude, Long id) {
         LOG.info("Send REST request to insert new traffic light.");
-        String uri = constructorURIofResource("localhost", 40001, "addTrafficLight", "");
+        String uri = createTargetForRequest("localhost", 40001, "addTrafficLight", "");
         Response response = client.target(uri).queryParam("longitude", longitude)
                 .queryParam("latitude", latitude)
-                .queryParam("id",id)
+                .queryParam("id", id)
                 .request()
                 .build("POST")
                 .invoke();
@@ -66,26 +71,26 @@ public class ApiGatewayService {
         return ResponseEntity.status(response.getStatus()).body("");
     }
 
-    public ResponseEntity<List<TrafficLight>> getAllTrafficLights(){
+    public ResponseEntity<List<TrafficLight>> getAllTrafficLights() {
         LOG.info("Send REST request to get all traffic lights");
-        String uri = constructorURIofResource("localhost", 40001, "getAllTrafficLights", "");
+        String uri = createTargetForRequest("localhost", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
-        return ResponseEntity.status(response.getStatus()).body(parseFromRequestResultToList(response.readEntity(String.class), TrafficLight.class));
+        return ResponseEntity.status(response.getStatus()).body(parseJsonToList(response.readEntity(String.class), TrafficLight.class));
     }
 
     /**
      * Get all vehicles from entity store service to present on the UI
+     *
      * @return Response entity with a list of all vehicles to show to the client and the status received from entity store service
      */
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         LOG.info("Send REST request to get all vehicles");
-        String uri = constructorURIofResource("localhost", 40001, "getAllVehicles", "");
+        String uri = createTargetForRequest("localhost", 40001, "getAllVehicles", "");
         Response response = client.target(uri).request().get();
-        return ResponseEntity.status(response.getStatus()).body(parseFromRequestResultToList(response.readEntity(String.class), Vehicle.class));
+        return ResponseEntity.status(response.getStatus()).body(parseJsonToList(response.readEntity(String.class), Vehicle.class));
     }
 
-    // parse request response in one method and return the list
-    private <T> List<T> parseFromRequestResultToList(String requestResult, Class clazz) {
+    private <T> List<T> parseJsonToList(String requestResult, Class clazz) {
         LOG.info("Sending request: " + requestResult);
         List<T> resultList = new ArrayList<>();
         try {
@@ -96,16 +101,6 @@ public class ApiGatewayService {
         }
         return resultList;
     }
-
-    // construct and return URI of the request for all REST request in one method
-    private static String constructorURIofResource(String host, int port, String methodName, String pathParam) {
-        StringBuilder stringBuilder = new StringBuilder("http://" + host +  ":" + port + "/" + methodName);
-        if (!pathParam.isEmpty()) {
-            stringBuilder.append("/").append(pathParam);
-        }
-        return stringBuilder.toString();
-    }
-
 
 
 }
