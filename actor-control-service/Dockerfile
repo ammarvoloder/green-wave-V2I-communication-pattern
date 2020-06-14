@@ -3,6 +3,5 @@ COPY src /home/app/src
 COPY pom.xml /home/app
 RUN mvn -f /home/app/pom.xml clean package -Dmaven.test.skip=true
 FROM openjdk:8-jdk-alpine
-COPY --from=build home/app/target/actor-registry-service-0.0.1-SNAPSHOT.jar /actor-registry-service.jar
-CMD java -jar /actor-registry-service.jar
-EXPOSE 40001
+COPY --from=build /home/app/target/actor-control-service-0.0.1-SNAPSHOT.jar /actor-control-service.jar
+CMD java -jar /actor-control-service.jar

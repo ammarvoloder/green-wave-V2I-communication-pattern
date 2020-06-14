@@ -57,7 +57,7 @@ public class ActorControlService {
     }
 
     private void findTrafficLights() {
-        String uri = constructorURIofResource("localhost", 40001, "getAllTrafficLights", "");
+        String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
         List<TrafficLight> list = parseJsonToList(response.readEntity(String.class));
         list.forEach(t -> trafficLights.put(t.getId(), t));
@@ -101,7 +101,7 @@ public class ActorControlService {
     private void isVehicleInRadius(Movement movement, RabbitChannel rabbitChannel) throws IOException {
 
         if (statusMap.isEmpty()) return;
-        String uri = constructorURIofResource("localhost", 40001, "checkRadius", "");
+        String uri = constructorURIofResource("actor-registry-service", 40001, "checkRadius", "");
         Response response = client.target(uri)
                 .queryParam("longitude", movement.getLongitude())
                 .queryParam("latitude", movement.getLatitude())

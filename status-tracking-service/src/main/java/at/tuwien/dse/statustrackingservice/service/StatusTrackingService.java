@@ -32,10 +32,22 @@ public class StatusTrackingService {
     public StatusTrackingService(StatusTrackingDAO statusTrackingDAO) {
         client = ClientBuilder.newClient();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        consumeQueue();
+        try {
+            consumeQueue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.statusTrackingDAO = statusTrackingDAO;
     }
 
+    /**
+     *
+     * @param host
+     * @param port
+     * @param methodName
+     * @param pathParam
+     * @return Concatenated string consisting of endpoint
+     */
     private static String createTargetForRequest(String host, int port, String methodName, String pathParam) {
         StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
         if (!pathParam.isEmpty()) {
@@ -44,7 +56,7 @@ public class StatusTrackingService {
         return stringBuilder.toString();
     }
 
-    private void consumeQueue() {
+    private void consumeQueue() throws IOException {
         RabbitChannel rabbitChannel = new RabbitChannel();
         DeliverCallback movementCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
@@ -52,7 +64,7 @@ public class StatusTrackingService {
                 TrafficLightStatus status = objectMapper.readValue(msg, TrafficLightStatus.class);
                 LOG.info("Traffic Light status read: " + status);
                 statusTrackingDAO.addTrafficLightStatus(status);
-                String uri = createTargetForRequest("localhost", 10113, "notifySocketTLStatus", "");
+                String uri = createTargetForRequest("api-gateway", 10113, "notifySocketTLStatus", "");
                 Response response = client.target(uri).queryParam("green", status.isGreen())
                         .queryParam("id", status.getTrafficLightId())
                         .queryParam("time", status.getDateTime())
@@ -63,7 +75,7 @@ public class StatusTrackingService {
                 Movement movement = objectMapper.readValue(msg, Movement.class);
                 LOG.info("Movement read: " + movement);
                 statusTrackingDAO.addMovement(movement);
-                String uri = createTargetForRequest("localhost", 10113, "notifySocketMovement", "");
+                String uri = createTargetForRequest("api-gateway", 10113, "notifySocketMovement", "");
                 Response response = client.target(uri).queryParam("vin", movement.getVin())
                         .queryParam("speed", movement.getSpeed())
                         .queryParam("time", movement.getDateTime())

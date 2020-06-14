@@ -23,7 +23,7 @@ public class SimulatorService {
     }
 
     private static void getVehicles(Client client) {
-        String uri = createTargetForRequest("localhost", 10113, "getAllVehicles", "");
+        String uri = createTargetForRequest("api-gateway", 10113, "getAllVehicles", "");
         Response response = client.target(uri)
                 .request()
                 .build("GET")
@@ -40,7 +40,7 @@ public class SimulatorService {
     }
 
     public void saveVehicle(String vehicleId, String model, String producer) {
-        String uri = createTargetForRequest("localhost", 10113, "addVehicle", "");
+        String uri = createTargetForRequest("api-gateway", 10113, "addVehicle", "");
         this.client.target(uri)
                 .queryParam("vehicleID", vehicleId)
                 .queryParam("producer", producer)
@@ -51,7 +51,7 @@ public class SimulatorService {
     }
 
     public void saveTrafficLight(Double longitude, Double latitude, Long id) {
-        String uri = createTargetForRequest("localhost", 10113, "addTrafficLight", "");
+        String uri = createTargetForRequest("api-gateway", 10113, "addTrafficLight", "");
         this.client.target(uri)
                 .queryParam("longitude", longitude)
                 .queryParam("latitude", latitude)

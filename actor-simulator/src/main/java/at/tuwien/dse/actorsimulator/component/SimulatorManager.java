@@ -47,7 +47,7 @@ public class SimulatorManager {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public SimulatorManager(SimulatorService simulatorService) {
+    public SimulatorManager(SimulatorService simulatorService) throws IOException {
         this.rabbitChannel = new RabbitChannel();
         this.simulatorService = simulatorService;
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());

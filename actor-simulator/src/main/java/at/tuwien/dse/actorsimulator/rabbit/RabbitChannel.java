@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
 public class RabbitChannel {
@@ -17,13 +19,13 @@ public class RabbitChannel {
     private Channel channel;
 
 
-    public RabbitChannel() {
+    public RabbitChannel() throws IOException {
         createConnection();
     }
 
-    private void createConnection() {
+    private void createConnection() throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("localhost");
+        connectionFactory.setHost("rabbitmq");
         connectionFactory.setPort(5672);
         connectionFactory.setUsername("guest");
         connectionFactory.setPassword("guest");
@@ -40,6 +42,16 @@ public class RabbitChannel {
         } catch (IOException | TimeoutException e) {
             LOG.error(e.getMessage());
         }
+    }
+
+    // Method used to load host and port for MongoDB from application.properties
+    private static Properties loadProperties() throws IOException {
+        LOG.info("Loading host and port for mongodb from application.properties");
+        Properties properties = new Properties();
+        try (InputStream in = Connection.class.getClassLoader().getResourceAsStream("application.properties")) {
+            properties.load(in);
+        }
+        return properties;
     }
 
     public Channel getChannel() {

@@ -54,6 +54,7 @@ export class InfotableComponent implements OnInit {
   }
 
   initSocketConnections() {
+    this.trafficLightDataSource.data = []
     let ws = new SockJS("http://localhost:10113/ws");
     this.ws = Stomp.over(ws);
     let that = this;
@@ -63,10 +64,8 @@ export class InfotableComponent implements OnInit {
         let trafficLight = that.trafficLights.find(light => tl['trafficLightId'] === light.id);
         trafficLight.statusGreen = tl['green'];
         trafficLight.statusChange = new Date(tl['dateTime']);
-        console.log(trafficLight)
         const data = that.trafficLightDataSource.data;
-        const index = data.indexOf(trafficLight);
-        index == -1 ? data.unshift(trafficLight) : console.log("tu sam usla");
+        data.unshift(JSON.parse(JSON.stringify(trafficLight)));
         that.trafficLightDataSource.data = data;
       });
       that.ws.subscribe("/movements", function (element) {
