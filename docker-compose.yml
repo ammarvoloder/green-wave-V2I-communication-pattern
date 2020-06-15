@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
         mongo:
                 image: mongo
@@ -62,11 +62,8 @@ services:
                       - rabbitmq
                       - actor-registry-service
                 restart: on-failure
-#        actor-simulator:
-#                build: actor-simulator
-#                image: actor-simulator
-#                container_name: actor-simulator
-#                depends_on:
-#                      - api-gateway
-#                      - actor-registry-service
-#                restart: on-failure
+
+networks:
+  default:
+    name: dse20_default
+    driver: bridge
