@@ -3,13 +3,14 @@ import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular
 import { TrafficLight } from '../models/traffic-light';
 import { Observable } from 'rxjs';
 import { Vehicle } from '../models/vehicle';
+import { environment } from 'src/environments/environment';
 
 
 
 
 
 
-const endpoint = 'http://localhost:10113';
+const endpoint = environment.apiEndpoint;
 
 
 @Injectable({

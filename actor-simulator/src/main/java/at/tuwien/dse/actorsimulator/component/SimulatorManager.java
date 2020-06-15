@@ -59,10 +59,10 @@ public class SimulatorManager {
 
     @PostConstruct
     public void setUp() {
-        consumeQueue();
+       // consumeQueue();
         createVehicles();
         createTrafficLights();
-        try {
+        /*try {
             // wait little bit for frontend to load core data before real simulation
             Thread.sleep(3000);
             scheduler.scheduleAtFixedRate(new StatusScheduler(trafficLightStatuses, rabbitChannel), 0, 10, TimeUnit.SECONDS);
@@ -76,7 +76,7 @@ public class SimulatorManager {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
+*/
     }
 
 

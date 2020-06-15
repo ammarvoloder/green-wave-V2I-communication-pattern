@@ -6,6 +6,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
 import {RestService} from 'src/app/services/rest-service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-infotable',
@@ -55,7 +56,7 @@ export class InfotableComponent implements OnInit {
 
   initSocketConnections() {
     this.trafficLightDataSource.data = []
-    let ws = new SockJS("http://localhost:10113/ws");
+    let ws = new SockJS(environment.apiEndpoint + "/ws");
     this.ws = Stomp.over(ws);
     let that = this;
     this.ws.connect({}, function (frame) {
