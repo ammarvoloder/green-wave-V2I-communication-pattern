@@ -11,6 +11,9 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * In charge of establishing connection to RabbitMQ and rabbit channels
+ */
 public class RabbitChannel {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitChannel.class);
@@ -23,6 +26,11 @@ public class RabbitChannel {
         createConnection();
     }
 
+    /**
+     * Establishes connection to RabbitMQ
+     *
+     * @throws IOException if could not create connection
+     */
     private void createConnection() throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("rabbitmq");
@@ -44,7 +52,12 @@ public class RabbitChannel {
         }
     }
 
-    // Method used to load host and port for MongoDB from application.properties
+    /**
+     * Method used to load host and port for MongoDB from application.properties
+     *
+     * @return properties from application.properties file
+     * @throws IOException if could not load properties
+     */
     private static Properties loadProperties() throws IOException {
         LOG.info("Loading host and port for mongodb from application.properties");
         Properties properties = new Properties();

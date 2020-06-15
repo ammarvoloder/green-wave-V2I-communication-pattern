@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * ApiGateway Rest Controller that declares and implements all REST methods and forward these requests to {@link ApiGatewayService}
+ */
 @RestController
 @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
 public class ApiGatewayController {
@@ -32,12 +35,12 @@ public class ApiGatewayController {
     }
 
     /**
-     * Rest POST Method - Insert new vehicle
+     * Rest POST Method - Forwards call to insert new vehicle
      *
-     * @param producer  of vehicle that is going to be stored in the db
-     * @param vehicleID of vehicle that is going to be stored in the db
-     * @param model     of vehicle that is going to be stored in the db
-     * @return Response entity with the status received after vehicle insertion in entity store service
+     * @param producer  of a vehicle that is going to be stored in db
+     * @param vehicleID of a vehicle that is going to be stored in db
+     * @param model     of a vehicle that is going to be stored in db
+     * @return Response entity with the status received after vehicle insertion in actor registry service
      */
     @PostMapping(path = "/addVehicle")
     public ResponseEntity addVehicle(@RequestParam String producer,
@@ -48,6 +51,13 @@ public class ApiGatewayController {
         return apiGatewayService.addVehicle(producer, vehicleID, model, headerId);
     }
 
+    /**
+     * Sends traffic light status to Web Socket
+     *
+     * @param id    of the traffic light
+     * @param green status of the traffic light (GREEN => true, RED => false)
+     * @param time  timestamp of the next status change
+     */
     @PostMapping(path = "/notifySocketTLStatus")
     public void sendVehicleToSocket(@RequestParam Long id,
                                     @RequestParam Boolean green,
@@ -57,6 +67,16 @@ public class ApiGatewayController {
         this.simpMessagingTemplate.convertAndSend("/trafficLights", trafficLightStatus);
     }
 
+    /**
+     * Sends movement to Web Socket
+     *
+     * @param vin       of the vehicle
+     * @param speed     of the vehicle
+     * @param time      timestamp when the movement happened
+     * @param longitude of the vehicle
+     * @param latitude  of the vehicle
+     * @param crash     status if the crash happened
+     */
     @PostMapping(path = "/notifySocketMovement")
     public void sendMovementToSocket(@RequestParam String vin,
                                      @RequestParam Double speed,
@@ -76,9 +96,9 @@ public class ApiGatewayController {
     }
 
     /**
-     * Rest GET Method - Get all vehicles to present on the UI
+     * Rest GET Method - Forwards call to get all vehicles from db
      *
-     * @return Response entity with a list of all vehicles to show to the client and the status received from entity store service
+     * @return Response entity with a list of all vehicles and the status received from actor registry service
      */
     @GetMapping(path = "/getAllVehicles")
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
@@ -86,6 +106,14 @@ public class ApiGatewayController {
         return apiGatewayService.getAllVehicles();
     }
 
+    /**
+     * Rest POST Method - Forwards call to insert new traffic light
+     *
+     * @param id        of a traffic light that is going to be stored in db
+     * @param longitude of a traffic light that is going to be stored in db
+     * @param latitude  of a traffic light that is going to be stored in db
+     * @return Response entity with the status received after traffic light insertion in actor registry service
+     */
     @PostMapping(path = "/addTrafficLight")
     public ResponseEntity addTrafficLight(@RequestParam Double longitude,
                                           @RequestParam Double latitude,
@@ -94,6 +122,11 @@ public class ApiGatewayController {
         return apiGatewayService.addTrafficLight(longitude, latitude, id);
     }
 
+    /**
+     * Rest GET Method - Forward call to get all traffic lights from db
+     *
+     * @return Response entity with a list of all traffic lights and the status received from actor registry service
+     */
     @GetMapping(path = "/getAllTrafficLights")
     public ResponseEntity<List<TrafficLight>> getAllTrafficLights() {
         LOG.info("Recieved GET all traffic lights");

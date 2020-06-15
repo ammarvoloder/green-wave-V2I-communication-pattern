@@ -63,11 +63,13 @@ public class SimulatorManager {
         createVehicles();
         createTrafficLights();
         try {
-            // wait little bit for frontend to load core data before real simulation
+            // wait for frontend to load core data before real simulation
             Thread.sleep(3000);
+            // periodically send traffic light status
             scheduler.scheduleAtFixedRate(new StatusScheduler(trafficLightStatuses, rabbitChannel), 0, 10, TimeUnit.SECONDS);
             Thread.sleep(3000);
             readRoute();
+            // start simulation for each vehicle in separate thread
             pool.execute(new SimulationThread(vehicles.get(0), movements, rabbitChannel));
             Thread.sleep(15000);
             pool.execute(new SimulationThread(vehicles.get(1), movements, rabbitChannel));
@@ -78,7 +80,6 @@ public class SimulatorManager {
         }
 
     }
-
 
     private void createVehicles() {
         saveVehicle("A11-T-111", "C4", "Citroen", 70.0);
@@ -95,10 +96,9 @@ public class SimulatorManager {
     private void consumeQueue() {
         DeliverCallback speedCallback = (consumerTag, message) -> {
             String msg = new String(message.getBody(), StandardCharsets.UTF_8);
-
             TrafficLightStatus status;
             Movement movement;
-
+            // message from queue addresses published traffic light status
             if (("traffic").equals(message.getProperties().getMessageId())) {
                 status = objectMapper.readValue(msg, TrafficLightStatus.class);
                 TrafficLightStatus stati = trafficLightStatuses.stream().filter(s -> s.getTrafficLightId().equals(status.getTrafficLightId()))  //
@@ -110,6 +110,7 @@ public class SimulatorManager {
                 }
                 LOG.info("Traffic Light status read for NCE event: " + status);
             } else {
+                // message from queue addresses published movement
                 movement = objectMapper.readValue(msg, Movement.class);
                 vehicles.stream().filter(i -> i.getVin().equals(movement.getVin())).findFirst() //
                         .ifPresent(v -> v.setSpeed(movement.getSpeed()));
@@ -125,6 +126,11 @@ public class SimulatorManager {
         }
     }
 
+    /**
+     * Reads movement route used for simulation from txt file
+     *
+     * @throws IOException id could not read from file
+     */
     private void readRoute() throws IOException {
         ClassPathResource resource = new ClassPathResource("route.txt");
         InputStream inputStream = resource.getInputStream();
@@ -144,6 +150,14 @@ public class SimulatorManager {
         }
     }
 
+    /**
+     * Forwards call to SimulatorService to invoke call to ActorRegistry to save vehicle
+     *
+     * @param vin of a vehicle to be saved
+     * @param model of a vehicle to be saved
+     * @param producer of a vehicle to be saved
+     * @param speed of a vehicle to be saved
+     */
     private void saveVehicle(String vin, String model, String producer, Double speed) {
         Vehicle v = new Vehicle(vin, model, producer);
         v.setSpeed(speed);
@@ -151,6 +165,14 @@ public class SimulatorManager {
         vehicles.add(v);
     }
 
+    /**
+     * Forwards call to SimulatorService to invoke call to ActorRegistry to save traffic light
+     *
+     * @param longitude of a traffic light to be saved
+     * @param latitude of a traffic light to be saved
+     * @param id of a traffic light to be saved
+     * @param green initial status of a traffic light to be saved (GREEN => true, RED => false)
+     */
     private void saveTrafficLight(Double longitude, Double latitude, Long id, boolean green) {
         this.simulatorService.saveTrafficLight(longitude, latitude, id);
         trafficLightStatuses.add(new TrafficLightStatus(green, id, LocalDateTime.now()));

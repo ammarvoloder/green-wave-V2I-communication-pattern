@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Thread that implement Runnable interface and executes movement simulation for each registered vehicle
+ */
 public class SimulationThread implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
@@ -36,6 +39,7 @@ public class SimulationThread implements Runnable {
                 movement.setSpeed(vehicle.getSpeed());
                 movement.setVin(vehicle.getVin());
                 movement.setDateTime(LocalDateTime.now());
+                // vehicle sends NCE event
                 if (movement.isCrash()) {
                     movement.setSpeed(0);
                     vehicle.setSpeed(0.0);
@@ -56,6 +60,7 @@ public class SimulationThread implements Runnable {
                     rabbitChannel.getChannel().basicPublish(MOVEMENT_STATUS_EXCHANGE, "", null, msg.getBytes());
                 }
                 double speed = movement.getSpeed() / 3.6;
+                // time until next movement depends on the distance from the next location point
                 long timeToWait = (long) (movement.getDistance() / speed * 1000);
                 Thread.sleep(timeToWait);
             } catch (IOException | InterruptedException e) {

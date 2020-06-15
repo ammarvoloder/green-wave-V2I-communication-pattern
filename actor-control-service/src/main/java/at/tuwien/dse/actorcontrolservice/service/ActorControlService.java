@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * ActorControl Service in charge of adjusting speed and time for manual activation of traffic lights
+ */
 @Service
 public class ActorControlService {
 
@@ -56,6 +59,9 @@ public class ActorControlService {
         consumeQueue();
     }
 
+    /**
+     * Forwards call to ActorRegistry service to get all traffic lights
+     */
     private void findTrafficLights() {
         String uri = constructorURIofResource("actor-registry-service", 40001, "getAllTrafficLights", "");
         Response response = client.target(uri).request().get();
@@ -85,8 +91,6 @@ public class ActorControlService {
                 LOG.info("Movement read: " + movement);
                 isVehicleInRadius(movement, rabbitChannel);
             }
-
-
         };
         try {
             LOG.info(rabbitChannel.toString());
@@ -95,9 +99,15 @@ public class ActorControlService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Forwards call to ActorRegistry service to check if the vehicle is in radius of some traffic light
+     *
+     * @param movement reported movement
+     * @param rabbitChannel for publishing determined speed and manual activation time
+     * @throws IOException if an error occurred while trying to determine speed of time for manual traffic light activation
+     */
     private void isVehicleInRadius(Movement movement, RabbitChannel rabbitChannel) throws IOException {
 
         if (statusMap.isEmpty()) return;
@@ -126,6 +136,14 @@ public class ActorControlService {
         determineSpeed(movement, trafficLight, rabbitChannel);
     }
 
+    /**
+     * Determines time for manual activation of a traffic light if the movement reported that crash occurred
+     *
+     * @param rabbitChannel to publish the determined time to the rabbit queue
+     * @param movement detected movement
+     * @param trafficLightId of a traffic light that should be manually activated
+     * @throws IOException if the value could not be written as String or the value could not be published to the queue
+     */
     private void timeForManualActivation(RabbitChannel rabbitChannel, Movement movement, Long trafficLightId) throws IOException {
         TrafficLight trafficLight = trafficLights.get(trafficLightId);
         TrafficLightStatus status = statusMap.get(trafficLightId);
@@ -155,6 +173,15 @@ public class ActorControlService {
 
     }
 
+    /**
+     * Calculates distance between two location points in meters
+     *
+     * @param userLat  the latitude of the first location point
+     * @param userLng  the longitude of the first location point
+     * @param venueLat the latitude of the second location point
+     * @param venueLng the longitude og the second location point
+     * @return distance in meters
+     */
     public int calculateDistanceInMeter(double userLat, double userLng,
                                         double venueLat, double venueLng) {
 
@@ -170,7 +197,15 @@ public class ActorControlService {
         return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_METERS * c));
     }
 
-    private void determineSpeed(Movement movement, Long trafficLightId, RabbitChannel rabbitChannel) throws IOException {
+    /**
+     * Determines target speed for the vehicle to achieve a green wave
+     *
+     * @param movement detected movement
+     * @param trafficLightId of the traffic light that the vehicle is approaching
+     * @param rabbitChannel to publish determined speed to the rabbit queue
+     * @throws IOException if the value could not be written as String or the value could not be published to the queue
+     */
+    private void determineSpeed(Movement movement, Long trafficLightId, RabbitChannel rabbitChannel) throws IOException{
         double speed;
         TrafficLight trafficLight = trafficLights.get(trafficLightId);
         TrafficLightStatus status = statusMap.get(trafficLightId);
@@ -207,7 +242,7 @@ public class ActorControlService {
         LOG.info("Determined speed " + speed);
 
         // speed can't be greater than 130 and
-        // less then 40 if distance to traffic light is still large (> 500m)
+        // less than 40 if distance to traffic light is still large (> 500m)
         if (speed > 130 || (speed < 40 && distance > 600)) {
             return;
         }
@@ -221,6 +256,13 @@ public class ActorControlService {
         actorControlDAO.addMovement(movement);
     }
 
+    /**
+     * Parses the request response from String to List
+     *
+     * @param requestResult response to be parsed
+     * @param <T>
+     * @return response as parsed result list
+     */
     private <T> List<T> parseJsonToList(String requestResult) {
         LOG.info("Sending request: " + requestResult);
         List<T> resultList = new ArrayList<>();
@@ -232,7 +274,15 @@ public class ActorControlService {
         return resultList;
     }
 
-
+    /**
+     * Constructs and returns URI of the request for all REST request in one method
+     *
+     * @param host
+     * @param port
+     * @param methodName
+     * @param pathParam
+     * @return Concatenated string consisting of endpoint
+     */
     private String constructorURIofResource(String host, int port, String methodName, String pathParam) {
         StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
         if (!pathParam.isEmpty()) {

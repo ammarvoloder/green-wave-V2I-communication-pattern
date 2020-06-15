@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
+/**
+ * ActorControl Repository that manages modifications to the MongoDB
+ */
 @Repository
 public class ActorControlDAO {
 
@@ -18,7 +21,7 @@ public class ActorControlDAO {
     private static final Logger LOG = LoggerFactory.getLogger(ActorControlDAO.class);
 
     /**
-     * movements - MongoDB Collection used for storing Vehicles
+     * movements - MongoDB Collection used for storing Movements
      */
     private MongoCollection<Movement> movements;
 
@@ -31,6 +34,11 @@ public class ActorControlDAO {
         }
     }
 
+    /**
+     * Inserts new movement to MongoDB collection
+     *
+     * @param movement to be inserted
+     */
     public void addMovement(Movement movement) {
         try {
             LOG.info("Inserting new movement/speed: " + movement);

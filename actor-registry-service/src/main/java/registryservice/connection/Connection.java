@@ -38,7 +38,12 @@ public class Connection {
         return mongoClient.getDatabase("vehicles").withCodecRegistry(pojoCodecRegistry);
     }
 
-    // Method used to load host and port for MongoDB from application.properties
+    /**
+     * Method used to load host and port for MongoDB from application.properties
+     *
+     * @return properties from application.properties file
+     * @throws IOException if could not load properties
+     */
     private static Properties loadProperties() throws IOException {
         LOG.info("Loading host and port for mongodb from application.properties");
         Properties properties = new Properties();

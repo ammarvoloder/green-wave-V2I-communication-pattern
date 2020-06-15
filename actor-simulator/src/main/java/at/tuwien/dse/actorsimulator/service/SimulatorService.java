@@ -9,6 +9,9 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
+/**
+ * Simulator Service in charge of simulating data and forwarding data to ApiGateway service
+ */
 @Service
 public class SimulatorService {
 
@@ -22,6 +25,11 @@ public class SimulatorService {
         client = ClientBuilder.newClient();
     }
 
+    /**
+     * Forwards call to ApiGateway service to get all vehicles
+     *
+     * @param client
+     */
     private static void getVehicles(Client client) {
         String uri = createTargetForRequest("api-gateway", 10113, "getAllVehicles", "");
         Response response = client.target(uri)
@@ -31,6 +39,15 @@ public class SimulatorService {
         System.out.println(response);
     }
 
+    /**
+     * Constructs and returns URI of the request for all REST request in one method
+     *
+     * @param host
+     * @param port
+     * @param methodName
+     * @param pathParam
+     * @return Concatenated string consisting of endpoint
+     */
     private static String createTargetForRequest(String host, int port, String methodName, String pathParam) {
         StringBuilder stringBuilder = new StringBuilder("http://" + host + ":" + port + "/" + methodName);
         if (!pathParam.isEmpty()) {
@@ -39,6 +56,13 @@ public class SimulatorService {
         return stringBuilder.toString();
     }
 
+    /**
+     * Forwards call to ApiGateway service to save new vehicle
+     *
+     * @param vehicleId of a vehicle to be inserted in db
+     * @param model     of a vehicle to be inserted in db
+     * @param producer  of a vehicle to be inserted in db
+     */
     public void saveVehicle(String vehicleId, String model, String producer) {
         String uri = createTargetForRequest("api-gateway", 10113, "addVehicle", "");
         this.client.target(uri)
@@ -50,6 +74,13 @@ public class SimulatorService {
                 .invoke();
     }
 
+    /**
+     * Forwards call to ApiGateway service to save new traffic light
+     *
+     * @param longitude  of a traffic light to be inserted to db
+     * @param latitude   of a traffic light to be inserted to db
+     * @param id         of a traffic light to be inserted to db
+     */
     public void saveTrafficLight(Double longitude, Double latitude, Long id) {
         String uri = createTargetForRequest("api-gateway", 10113, "addTrafficLight", "");
         this.client.target(uri)
