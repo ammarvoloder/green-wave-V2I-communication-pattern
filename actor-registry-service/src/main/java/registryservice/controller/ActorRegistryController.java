@@ -15,7 +15,9 @@ import registryservice.service.ActorRegistryService;
 
 import java.util.List;
 
-
+/**
+ * ActorRegistry Rest Controller that declares and implements all REST methods and forward these requests to {@link ActorRegistryService}
+ */
 @RestController
 public class ActorRegistryController {
 
@@ -26,11 +28,11 @@ public class ActorRegistryController {
 
 
     /**
-     * Rest POST Method - Insert new vehicle
+     * Rest POST Method - Inserts new vehicle in db
      *
-     * @param vin      of vehicle that is going to be stored in the db
-     * @param model    of vehicle that is going to be stored in the db
-     * @param producer of vehicle that is going to be stored in the db
+     * @param vin      of a vehicle that is going to be stored in db
+     * @param model    of a vehicle that is going to be stored in db
+     * @param producer of a vehicle that is going to be stored in db
      * @return Response entity with response status 200
      */
     @PostMapping(path = "/addVehicle")
@@ -43,6 +45,14 @@ public class ActorRegistryController {
 
     }
 
+    /**
+     * Rest POST Method - Inserts new traffic light in db
+     *
+     * @param id        of a traffic light that is going to be stored in db
+     * @param longitude of a traffic light that is going to be stored in db
+     * @param latitude  of a traffic light that is going to be stored in db
+     * @return Response entity with response status 200
+     */
     @PostMapping(path = "/addTrafficLight")
     public ResponseEntity addTrafficLight(@RequestParam Long id,
                                           @RequestParam Double longitude,
@@ -53,7 +63,13 @@ public class ActorRegistryController {
 
     }
 
-
+    /**
+     * Rest GET Method - Checks if the vehicle is in radius of some traffic light
+     *
+     * @param latitude   of checked vehicle
+     * @param longitude  of checked vehicle
+     * @return Response entity with an id of the found traffic light and response status 200
+     */
     @GetMapping(path = "/checkRadius")
     public ResponseEntity<Long> checkRadius(@RequestParam Double latitude, @RequestParam Double longitude) {
         LOG.info("Received check raidus for: " + latitude + " " + longitude);
@@ -61,16 +77,20 @@ public class ActorRegistryController {
     }
 
     /**
-     * Rest GET Method - Get all vehicles from the db
+     * Rest GET Method - Gets all vehicles from db
      *
      * @return Response entity with a list of all vehicles and response status 200
      */
     @GetMapping(path = "/getAllVehicles")
-
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         return ResponseEntity.ok(actorRegistryService.getAllVehicles());
     }
 
+    /**
+     * Rest GET Method - Gets all traffic lights from db
+     *
+     * @return Response entity with a list off all traffic lights and response status 200
+     */
     @GetMapping(path = "/getAllTrafficLights")
     public ResponseEntity<List<TrafficLight>> getAllTrafficLights() {
         return ResponseEntity.ok(actorRegistryService.getAllTrafficLights());

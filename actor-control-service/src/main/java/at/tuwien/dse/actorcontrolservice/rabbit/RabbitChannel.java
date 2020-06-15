@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * In charge of establishing connection to RabbitMQ and rabbit channels
+ */
 public class RabbitChannel {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitChannel.class);
@@ -21,6 +24,11 @@ public class RabbitChannel {
         createConnection();
     }
 
+    /**
+     * Establishes connection to RabbitMQ
+     *
+     * @throws IOException if could not create connection
+     */
     private void createConnection() {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("rabbitmq");

@@ -12,6 +12,9 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
+/**
+ * StatusTracking Repository that manages modifications to the MongoDB
+ */
 @Repository
 public class StatusTrackingDAO {
 
@@ -41,6 +44,11 @@ public class StatusTrackingDAO {
         }
     }
 
+    /**
+     * Inserts new movement to MongoDB collection
+     *
+     * @param movement to be inserted
+     */
     public void addMovement(Movement movement) {
         try {
             movements.insertOne(movement);
@@ -50,7 +58,11 @@ public class StatusTrackingDAO {
 
     }
 
-
+    /**
+     * Inserts new traffic light status to MongoDB collection
+     *
+     * @param status to be inserted
+     */
     public void addTrafficLightStatus(TrafficLightStatus status) {
         try {
             trafficLightStatus.insertOne(status);

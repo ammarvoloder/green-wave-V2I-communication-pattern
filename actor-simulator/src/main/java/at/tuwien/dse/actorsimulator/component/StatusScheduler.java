@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Thread that implements Runnable interface and manages changes of traffic lights statuses
+ */
 public class StatusScheduler implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(StatusScheduler.class);
@@ -38,6 +41,7 @@ public class StatusScheduler implements Runnable {
 
     @Override
     public void run() {
+        // periodically sends new traffic lights statuses
         if (trafficLightStatus == null) {
             LOG.info("Sendig status at fixed rate...");
             trafficLightStatuses.forEach(trafficLight -> {
@@ -56,6 +60,7 @@ public class StatusScheduler implements Runnable {
                 }
             });
         } else {
+            // manually changes traffic light status due to reported NCE event
             LOG.info("Turning green light manually because of NCE \n");
             trafficLightStatus.setGreen(true);
             trafficLightStatus.setDateTime(LocalDateTime.now());

@@ -18,6 +18,9 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * StatusTracking Service in charge of receiving/forwarding data from/to ApiGateway service
+ */
 @Service
 public class StatusTrackingService {
 
@@ -41,6 +44,7 @@ public class StatusTrackingService {
     }
 
     /**
+     * Constructs and returns URI of the request for all REST request in one method
      *
      * @param host
      * @param port

@@ -11,6 +11,9 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * In charge of establishing connection to RabbitMQ and rabbit channels
+ */
 public class RabbitChannel {
 
     public static final String SPEED_QUEUE = "speed_queue";
@@ -24,7 +27,13 @@ public class RabbitChannel {
         createConnection();
     }
 
+    /**
+     * Establishes connection to RabbitMQ
+     *
+     * @throws IOException if could not create connection
+     */
     private void createConnection() throws IOException {
+        //instantiate and set connection factory parameters
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("rabbitmq");
         connectionFactory.setPort(5672);

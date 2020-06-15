@@ -24,6 +24,9 @@ import java.util.List;
 
 import static com.mongodb.client.model.Filters.*;
 
+/**
+ * ActorRegistry Repository that manages modifications to the MongoDB
+ */
 @Repository
 public class ActorRegistryDAO {
 
@@ -33,11 +36,8 @@ public class ActorRegistryDAO {
     private static final String VEHICLE_COLLECTION = "vehicles";
     private static final String TRAFFIC_LIGHTS_COLLECTION = "traffic_lights";
     private static final String ID = "id";
-    private static final String LATITUDE = "latitude";
-    private static final String LONGITUDE = "longitude";
     private static final String COORDINATES = "coordinates";
     private static final String LOCATION = "location";
-
 
     /**
      * vehicles - MongoDB Collection used for storing Vehicles
@@ -63,6 +63,11 @@ public class ActorRegistryDAO {
         }
     }
 
+    /**
+     * Inserts new vehicle in db
+     *
+     * @param vehicle to be stored in db
+     */
     public void addVehicle(Vehicle vehicle) {
         try {
             LOG.info("Inserting new vehicle: " + vehicle.getVin());
@@ -70,19 +75,23 @@ public class ActorRegistryDAO {
         } catch (MongoWriteException e) {
             LOG.error("Error while writing in Mongo");
         }
-
     }
 
     /**
-     * Methods which gets all vehicles
+     * Gets all vehicles from db
      *
-     * @return List of all vehicles
+     * @return A list of all vehicles
      */
     public List<Vehicle> getAllVehicles() {
         LOG.info("Getting all vehicles");
         return vehicles.find().into(new ArrayList<>());
     }
 
+    /**
+     * Inserts new traffic light to db
+     *
+     * @param trafficLight to be stored in db
+     */
     public void addTrafficLight(TrafficLight trafficLight) {
         LOG.info("Inserting new traffic light");
         List<Double> coordinates = new ArrayList<>();
@@ -97,11 +106,11 @@ public class ActorRegistryDAO {
     }
 
     /**
-     * It returns id of the traffic light in which radius vehicle is found
+     * Checks if the vehicle is in radius of some traffic light
      *
-     * @param latitude
-     * @param longitude
-     * @return
+     * @param latitude   of checked vehicle
+     * @param longitude  of checked vehicle
+     * @return An id of the found traffic light
      */
     public Long findIfInRadius(double latitude, double longitude) {
         Position position = new Position(latitude, longitude);
@@ -120,9 +129,9 @@ public class ActorRegistryDAO {
     }
 
     /**
-     * Methods which gets all traffic lights
+     * Gets all traffic lights
      *
-     * @return List of all traffic lights
+     * @return A list of all traffic lights
      */
     public List<TrafficLight> getAllTrafficLights() {
         LOG.info("Getting all traffic lights");
@@ -134,6 +143,12 @@ public class ActorRegistryDAO {
         return trafficLights;
     }
 
+    /**
+     * Maps Mongo document to TrafficLightDTO object
+     *
+     * @param d Mongo document to be mapped
+     * @return TrafficLightDTO object
+     */
     private TrafficLight mapDocumentToTrafficLight(Document d) {
         List<?> coordinates = (List<?>) ((Document) d.get(LOCATION)).get(COORDINATES);
         Double latitude = ((Double) coordinates.get(0));
