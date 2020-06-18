@@ -35,7 +35,7 @@ public class Connection {
             String mongoDBURI = loadProperties().getProperty("spring.data.mongodb.uri");
             mongoClient = new MongoClient(new MongoClientURI(mongoDBURI));
         }
-        return mongoClient.getDatabase("vehicles").withCodecRegistry(pojoCodecRegistry);
+        return mongoClient.getDatabase("actors").withCodecRegistry(pojoCodecRegistry);
     }
 
     /**

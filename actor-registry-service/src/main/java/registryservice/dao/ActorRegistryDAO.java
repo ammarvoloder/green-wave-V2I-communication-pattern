@@ -63,6 +63,11 @@ public class ActorRegistryDAO {
         }
     }
 
+    public ActorRegistryDAO(MongoCollection<Vehicle> vehicles, MongoCollection<Document> trafficLights) {
+        this.vehicles = vehicles;
+        this.trafficLights = trafficLights;
+    }
+
     /**
      * Inserts new vehicle in db
      *
@@ -84,7 +89,12 @@ public class ActorRegistryDAO {
      */
     public List<Vehicle> getAllVehicles() {
         LOG.info("Getting all vehicles");
-        return vehicles.find().into(new ArrayList<>());
+        FindIterable<Vehicle> iterable =  vehicles.find();
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+        for (Vehicle v : iterable) {
+            vehicles.add(v);
+        }
+        return vehicles;
     }
 
     /**

@@ -71,7 +71,7 @@
     </ng-container>
 
     <ng-container matColumnDef="statusChange">
-      <mat-header-cell *matHeaderCellDef>Next Status Change</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef>Last Status Change</mat-header-cell>
       <mat-cell *matCellDef="let tlStatus"
                 class="speed-cell">{{tlStatus.statusChange | date : "medium"}}</mat-cell>
     </ng-container>

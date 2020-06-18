@@ -53,6 +53,14 @@ public class ActorControlService {
 
     }
 
+    public ActorControlService(Client client, ConcurrentHashMap<Long, TrafficLightStatus> statusMap,  Map<Long, TrafficLight> trafficLights, ActorControlDAO actorControlDAO) {
+        this.client = client;
+        this.statusMap = statusMap;
+        this.trafficLights = trafficLights;
+        this.actorControlDAO = actorControlDAO;
+        objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    }
+
     @PostConstruct
     public void setUp() {
         //findTrafficLights();
@@ -205,7 +213,7 @@ public class ActorControlService {
      * @param rabbitChannel to publish determined speed to the rabbit queue
      * @throws IOException if the value could not be written as String or the value could not be published to the queue
      */
-    private void determineSpeed(Movement movement, Long trafficLightId, RabbitChannel rabbitChannel) throws IOException{
+    public void determineSpeed(Movement movement, Long trafficLightId, RabbitChannel rabbitChannel) throws IOException{
         double speed;
         TrafficLight trafficLight = trafficLights.get(trafficLightId);
         TrafficLightStatus status = statusMap.get(trafficLightId);

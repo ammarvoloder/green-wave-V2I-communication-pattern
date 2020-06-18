@@ -52,7 +52,7 @@ public class ApiGatewayController {
                                      @RequestParam String model,
                                      @RequestHeader("id") String headerId) {
         LOG.info("Received POST insert vehicle with id: " + vehicleID);
-        return apiGatewayService.addVehicle(producer, vehicleID, model, headerId);
+        return apiGatewayService.addVehicle(producer, vehicleID, model);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ApiGatewayController {
      */
     @PostMapping(path = "/notifySocketTLStatus")
     @ApiOperation(value = "Notify frontend application about changed traffic light status")
-    public void sendVehicleToSocket(@RequestParam Long id,
+    public void sendTLStatusToSocket(@RequestParam Long id,
                                     @RequestParam Boolean green,
                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
         LOG.info("Get " + id);

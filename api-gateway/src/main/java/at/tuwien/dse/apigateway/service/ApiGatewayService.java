@@ -32,6 +32,11 @@ public class ApiGatewayService {
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
+    public ApiGatewayService(Client client) {
+        this.client = client;
+        objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    }
+
     /**
      * Constructs and returns URI of the request for all REST request in one method
      *
@@ -55,10 +60,9 @@ public class ApiGatewayService {
      * @param producer  of a vehicle that is going to be stored in db
      * @param vehicleID of a vehicle that is going to be stored in db
      * @param model     of a vehicle that is going to be stored in db
-     * @param headerId  Header value of a key id
      * @return Response entity with the status received after vehicle insertion in actor registry service
      */
-    public ResponseEntity addVehicle(String producer, String vehicleID, String model, String headerId) {
+    public ResponseEntity addVehicle(String producer, String vehicleID, String model) {
         LOG.info("Send REST request to insert new vehicle with id: " + vehicleID);
         String uri = createTargetForRequest("actor-registry-service", 40001, "addVehicle", "");
         Response response = client.target(uri).queryParam("producer", producer).queryParam("vin", vehicleID).queryParam("model", model)
