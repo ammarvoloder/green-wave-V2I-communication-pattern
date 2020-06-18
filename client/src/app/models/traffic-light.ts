@@ -18,6 +18,6 @@ export class TrafficLight {
                 + 'Longitude: ' + this.longitude + '\n'
                 + 'Latitude: ' + this.latitude + '\n'
                 + 'Status: ' + status + '\n'
-                + 'Next status change: ' + statusChange;
+                + 'Last status change: ' + statusChange;
     }
 }

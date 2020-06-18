@@ -24,7 +24,6 @@ public class StatusTrackingDAO {
 
     private static final String STATUS_COLLECCTION = "statuses";
 
-
     /**
      * movements - MongoDB Collection used for storing Vehicles
      */
@@ -32,13 +31,18 @@ public class StatusTrackingDAO {
     /**
      * trafficLights - MongoDB Collection used for storing traffic lights
      */
-    private MongoCollection<TrafficLightStatus> trafficLightStatus;
+    private MongoCollection<TrafficLightStatus> trafficLightStatuses;
+
+    public StatusTrackingDAO(MongoCollection<Movement> movements, MongoCollection<TrafficLightStatus> trafficLightStatuses) {
+        this.movements = movements;
+        this.trafficLightStatuses = trafficLightStatuses;
+    }
 
     @PostConstruct
     private void initialize() {
         try {
             movements = Connection.getDatabase().getCollection(MOVEMENT_COLLECTION, Movement.class);
-            trafficLightStatus = Connection.getDatabase().getCollection(STATUS_COLLECCTION, TrafficLightStatus.class);
+            trafficLightStatuses = Connection.getDatabase().getCollection(STATUS_COLLECCTION, TrafficLightStatus.class);
         } catch (IOException e) {
             LOG.error("Error while connecting to MongoDB.");
         }
@@ -65,7 +69,7 @@ public class StatusTrackingDAO {
      */
     public void addTrafficLightStatus(TrafficLightStatus status) {
         try {
-            trafficLightStatus.insertOne(status);
+            trafficLightStatuses.insertOne(status);
         } catch (MongoWriteException e) {
             LOG.error("Error while writing in Mongo");
         }
