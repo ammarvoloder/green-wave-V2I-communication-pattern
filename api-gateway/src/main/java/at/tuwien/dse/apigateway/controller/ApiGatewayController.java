@@ -5,6 +5,8 @@ import at.tuwien.dse.apigateway.dto.TrafficLight;
 import at.tuwien.dse.apigateway.dto.TrafficLightStatus;
 import at.tuwien.dse.apigateway.dto.Vehicle;
 import at.tuwien.dse.apigateway.service.ApiGatewayService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.util.List;
  */
 @RestController
 @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
+@Api(description = "API Gateway for communication with different microservices")
 public class ApiGatewayController {
     private static final Logger LOG = LoggerFactory.getLogger(ApiGatewayController.class);
 
@@ -43,6 +46,7 @@ public class ApiGatewayController {
      * @return Response entity with the status received after vehicle insertion in actor registry service
      */
     @PostMapping(path = "/addVehicle")
+    @ApiOperation(value="Add new vehicle")
     public ResponseEntity addVehicle(@RequestParam String producer,
                                      @RequestParam String vehicleID,
                                      @RequestParam String model,
@@ -59,6 +63,7 @@ public class ApiGatewayController {
      * @param time  timestamp of the next status change
      */
     @PostMapping(path = "/notifySocketTLStatus")
+    @ApiOperation(value = "Notify frontend application about changed traffic light status")
     public void sendTLStatusToSocket(@RequestParam Long id,
                                     @RequestParam Boolean green,
                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
@@ -78,6 +83,7 @@ public class ApiGatewayController {
      * @param crash     status if the crash happened
      */
     @PostMapping(path = "/notifySocketMovement")
+    @ApiOperation(value = "Notify frontend application about new movement")
     public void sendMovementToSocket(@RequestParam String vin,
                                      @RequestParam Double speed,
                                      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time,
@@ -101,6 +107,7 @@ public class ApiGatewayController {
      * @return Response entity with a list of all vehicles and the status received from actor registry service
      */
     @GetMapping(path = "/getAllVehicles")
+    @ApiOperation(value = "View list of all vehicles")
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         LOG.info("Received GET all vehicles");
         return apiGatewayService.getAllVehicles();
@@ -115,6 +122,7 @@ public class ApiGatewayController {
      * @return Response entity with the status received after traffic light insertion in actor registry service
      */
     @PostMapping(path = "/addTrafficLight")
+    @ApiOperation(value = "Add traffic light")
     public ResponseEntity addTrafficLight(@RequestParam Double longitude,
                                           @RequestParam Double latitude,
                                           @RequestParam Long id) {
@@ -128,6 +136,7 @@ public class ApiGatewayController {
      * @return Response entity with a list of all traffic lights and the status received from actor registry service
      */
     @GetMapping(path = "/getAllTrafficLights")
+    @ApiOperation(value = "View list of all traffic lights")
     public ResponseEntity<List<TrafficLight>> getAllTrafficLights() {
         LOG.info("Recieved GET all traffic lights");
         return apiGatewayService.getAllTrafficLights();
