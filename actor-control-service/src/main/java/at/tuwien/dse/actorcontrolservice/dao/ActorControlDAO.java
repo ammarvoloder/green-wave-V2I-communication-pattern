@@ -6,6 +6,7 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -25,18 +26,19 @@ public class ActorControlDAO {
      */
     private MongoCollection<Movement> movements;
 
-    public ActorControlDAO(MongoCollection<Movement> movements) {
-        this.movements = movements;
-    }
-
-    @PostConstruct
-    private void initialize() {
+    @Autowired
+    public ActorControlDAO(){
         try {
             movements = Connection.getDatabase().getCollection(MOVEMENT_COLLECTION, Movement.class);
         } catch (IOException e) {
             LOG.error("Error while connecting to MongoDB.");
         }
     }
+
+    public ActorControlDAO(MongoCollection<Movement> movements) {
+        this.movements = movements;
+    }
+
 
     /**
      * Inserts new movement to MongoDB collection

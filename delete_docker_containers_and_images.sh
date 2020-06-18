@@ -6,4 +6,6 @@ docker rmi api-gateway:latest
 docker rmi status-tracking-service:latest
 docker rmi actor-control-service:latest
 docker rmi actor-simulator:latest
+docker rmi mongo:latest
+docker rmi rabbitmq:latest
 docker rmi client:latest

@@ -7,6 +7,7 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -33,13 +34,8 @@ public class StatusTrackingDAO {
      */
     private MongoCollection<TrafficLightStatus> trafficLightStatuses;
 
-    public StatusTrackingDAO(MongoCollection<Movement> movements, MongoCollection<TrafficLightStatus> trafficLightStatuses) {
-        this.movements = movements;
-        this.trafficLightStatuses = trafficLightStatuses;
-    }
-
-    @PostConstruct
-    private void initialize() {
+    @Autowired
+    public StatusTrackingDAO(){
         try {
             movements = Connection.getDatabase().getCollection(MOVEMENT_COLLECTION, Movement.class);
             trafficLightStatuses = Connection.getDatabase().getCollection(STATUS_COLLECCTION, TrafficLightStatus.class);
@@ -47,6 +43,12 @@ public class StatusTrackingDAO {
             LOG.error("Error while connecting to MongoDB.");
         }
     }
+
+    public StatusTrackingDAO(MongoCollection<Movement> movements, MongoCollection<TrafficLightStatus> trafficLightStatuses) {
+        this.movements = movements;
+        this.trafficLightStatuses = trafficLightStatuses;
+    }
+
 
     /**
      * Inserts new movement to MongoDB collection
