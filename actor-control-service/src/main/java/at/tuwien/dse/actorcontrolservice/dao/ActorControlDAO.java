@@ -25,6 +25,10 @@ public class ActorControlDAO {
      */
     private MongoCollection<Movement> movements;
 
+    public ActorControlDAO(MongoCollection<Movement> movements) {
+        this.movements = movements;
+    }
+
     @PostConstruct
     private void initialize() {
         try {
