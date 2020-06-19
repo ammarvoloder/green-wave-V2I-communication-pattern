@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 
-public class ActorControlDAOTests {
+public class ActorControlDAOTest {
     @Mock
     private static MongoCollection movements;
 

@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 
-public class ActorControlServiceTests {
+public class ActorControlServiceTest {
 
     @Mock
     private Client client;

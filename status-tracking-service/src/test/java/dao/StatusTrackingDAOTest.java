@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 import java.time.LocalDateTime;
 
 
-public class StatusTrackingDAOTests {
+public class StatusTrackingDAOTest {
     @Mock
     private static MongoCollection movements;
     @Mock
